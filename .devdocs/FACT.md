@@ -181,3 +181,80 @@ Files:
 risk-control, 710022004, blocked, known-limitation
 
 version: v26.0.0-alpha.1
+
+***
+
+## {FACTTime: 2026.09.28-02:20:00} DoubaoRiskControlIsTwoForms 004
+
+GitCommitHashRange: (initial)-HEAD (2)
+
+Files:
+```
+.\src\doubao_media\verify.py             +420 -0
+.\src\doubao_media\errors.py             +45 -0
+.\tests\test_risk_control.py             +120 -0
+.\docs\adr\0003-*.md                     +80 -0
+```
+
+### What's Happened?
+FACT-003 的结论被**修正**：`710022004` 不是"无法解决的封禁"，而是**可解的安全验证**；
+并发现了第二种形态 `710022002`（不可解的频率封禁）——而后者是本项目自己造成的。
+
+### Any evidence?
+1. `live`：`710022004` 载荷内含 `ext.decision.type = "verify"`、
+   `subtype = "slide"`、`detail = <blob>`、`verify_scene = "doubao_message_web"`。
+2. `static`：豆包官方 `106.js` 中的调用点是
+   `verifyCenter.renderCaptcha({verify_data, captchaOptions, secondVerifyWebOptions})`，
+   其中 `verify_data` 就是 decision 对象本身（SDK 读它的 `.region`/`.log_id`/`.fp`）。
+3. `live`：页面暴露了官方集成入口
+   `window.verifyCenter`（`init`/`initVerifyCenter`/`initVerifyOptions`/`autoRender`/
+   `renderCaptcha`/`renderSecondVerifyWeb`/`closeCaptcha`/`getCaptchaWebId`/`SMS`）
+   与 `window.__VERIFY_CENTER_RUNTIME__`（`myOptions`/`myFp`/`myVerify`/`mySMS`）。
+4. `live`：连续探测后错误码**变为** `710022002`（`"block"` /
+   `"当前服务访问频繁，请稍后重试"`），**无** `decision`。
+
+### Any Perjury?
+#### Perjury1
+"境外 IP 导致风控"——**已证伪**。Clash 按规则分流，国内域名直连；
+用国内回显（myip.ipip.net）实测豆包链路出口为广州电信，
+`www.doubao.com` 解析为国内 CDN（`113.96.150.x` / `183.60.205.x` / `183.61.231.x`）。
+只有境外站点（api.ipify.org）才走东京 G-Core Labs。
+#### Perjury2
+"缺少签名导致风控"——**已证伪**。`bdms.frontierSign(query)` 返回有效
+`X-Bogus`，显式附加后结果不变。
+#### Perjury3
+"是图像能力/权限问题"——**已证伪**。纯文本（`content_type: 2001`）被同样拦截。
+
+### Researches
+#### Result1
+两种形态的处理方式完全相反：形态 A 解决一次即可继续；形态 B **无法解决**，
+只能等待，且重试会加重。
+#### Result2
+形态 B 是**自找的**：本项目调试期间反复发起生成调用导致。
+
+### Any Founds?
+1. 形态 A 的 `subtype` 实测出现过 `slide` 与 `semantic_reasoning`。
+2. 实现必须驱动页面自身的 `verifyCenter`，而不是自己 new CDN 类
+   （后者会对 blob 调 `JSON.parse` 报错，说明包装层才是入口）。
+
+### Solutions
+1. 拆分为两个异常类型：`DoubaoRiskControl`（可解，带 challenge）与
+   `DoubaoRateLimited`（不可解）。
+2. 新增 MCP 工具 `doubao_verify_challenge`，由用户在**可见窗口**内完成验证。
+3. 在 skill 中写入硬规则：每个用户请求最多一次生成，禁止批量与重试循环；
+   禁止用真实生成调用做协议探测。
+4. 不自动化验证本身（不做滑块破解、不重签 blob）——理由见 `docs/adr/0003`。
+
+### FACTs
+1. `710022004` = 可解安全验证；`710022002` = 不可解频率封禁。
+2. 官方验证入口：`window.verifyCenter.renderCaptcha({verify_data, captchaOptions,
+   secondVerifyWebOptions})`；`verify_data` 为 decision 对象。
+3. 风控与出口 IP 无关（豆包走国内直连）、与签名无关、与模态无关。
+4. 触发形态 B 的行为本身是违规操作，须避免。
+5. **诚实标注**：`doubao_verify_challenge` 已按官方入口实现，但**未做端到端实测**
+   （因账号当时处于形态 B，实测会加重封禁）。
+
+### Tags
+risk-control, 710022004, 710022002, verification, corrected
+
+version: v26.0.0-alpha.1

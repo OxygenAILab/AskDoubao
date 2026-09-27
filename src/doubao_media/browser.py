@@ -24,7 +24,7 @@ import contextlib
 import json
 import os
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -63,6 +63,8 @@ class BrowserTransport:
         profile_dir: str | Path | None = None,
         executable_path: str | None = None,
         channel: str | None = None,
+        launch_args: Sequence[str] | None = None,
+        bypass_proxy: bool | None = None,
         startup_timeout: float = 60.0,
         request_timeout: float = 240.0,
     ) -> None:
@@ -83,6 +85,17 @@ class BrowserTransport:
             "DOUBAO_MEDIA_BROWSER_PATH"
         )
         self.channel = channel or os.environ.get("DOUBAO_MEDIA_BROWSER_CHANNEL")
+        self.launch_args = list(launch_args or [])
+        # Doubao is a mainland-China service.  When the machine routes through a
+        # proxy (Clash and friends set the system proxy), Chromium inherits it and
+        # the request leaves from a foreign datacentre IP, which ByteDance risk
+        # control refuses outright.  Bypassing the proxy for Chromium is
+        # therefore the correct default on such machines; set
+        # DOUBAO_MEDIA_BROWSER_PROXY=use to keep the system proxy instead.
+        env_bypass = os.environ.get("DOUBAO_MEDIA_BROWSER_PROXY", "").strip().lower()
+        if bypass_proxy is None:
+            bypass_proxy = env_bypass != "use"
+        self.bypass_proxy = bypass_proxy
         self.startup_timeout = startup_timeout
         self.request_timeout = request_timeout
 
@@ -125,6 +138,12 @@ class BrowserTransport:
                     "--no-first-run",
                     "--no-default-browser-check",
                     "--disable-dev-shm-usage",
+                    *(
+                        ["--no-proxy-server"]
+                        if self.bypass_proxy
+                        else []
+                    ),
+                    *self.launch_args,
                 ],
                 "ignore_default_args": ["--enable-automation"],
             }

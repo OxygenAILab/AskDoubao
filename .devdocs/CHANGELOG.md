@@ -54,5 +54,46 @@ Num|File Name|Change Description|Change Time|Changer
 version: v26.0.0-alpha.1
 
 ---
+<!-- G   it  H   ub @Apr   ismLa  b | Apri s   mL   ab @   Sta rs a i lsClov  er -->
+
+## {ChangeTime: 2026.09.28-02:35:00} v26.0.0-alpha.1 风控双形态与安全验证
+
+GitCommitHash: (pending)
+
+ChangedFiles:
+```
+.\src\doubao_media\verify.py             +420 -0
+.\src\doubao_media\errors.py             +45 -0
+.\src\doubao_media\client.py             +12 -6
+.\src\doubao_media\browser.py            +24 -2
+.\src\doubao_media\mcp\server.py         +95 -6
+.\tests\test_risk_control.py             +120 -0
+.\tests\test_verify.py                   +95 -0
+.\docs\adr\0003-*.md                     +80 -0
+.\docs\protocol.md                       +100 -52
+.\README.md                              +60 -32
+.\CLAUDE.md                              +60 -0
+.\plugins\doubao-media\skills\wen-doubao\SKILL.md +50 -22
+```
+
+ChangeLog:
+Num|File Name|Change Description|Change Time|Changer
+----|----|----|----|----
+1|verify.py|新增风控挑战解析与官方验证流（驱动 window.verifyCenter）|2026.09.28-02:00:00|Codex
+2|errors.py|拆分 DoubaoRiskControl（可解）与 DoubaoRateLimited（不可解）|2026.09.28-02:05:00|Codex
+3|client.py|SSE 错误事件改用 parse_risk_control 分类|2026.09.28-02:08:00|Codex
+4|browser.py|新增 bypass_proxy / launch_args（国内服务需绕过系统代理）|2026.09.28-01:30:00|Codex
+5|mcp/server.py|新增 doubao_verify_challenge；失败信封附带 riskControl 指引|2026.09.28-02:12:00|Codex
+6|tests|新增 12 项测试覆盖两种形态的判定|2026.09.28-02:15:00|Codex
+7|docs/adr/0003|记录"可解但不得自动化"的决策与证据|2026.09.28-02:20:00|Codex
+8|docs/protocol.md|第 5 节重写为双形态 + 已排除原因表|2026.09.28-02:25:00|Codex
+9|README.md|同步能力表与风控章节|2026.09.28-02:28:00|Codex
+10|SKILL.md|新增验证流程、频率封禁处理、禁止批量的硬规则|2026.09.28-02:30:00|Codex
+11|CLAUDE.md|新增维护者须知与四条硬规则|2026.09.28-02:32:00|Codex
+<!-- Git  Hub@ Ap r   ism  L ab | Apr   is mL a  b@  S  t arsai l  sC lov  er -->
+
+version: v26.0.0-alpha.1
+
+---
 
 License: MIT

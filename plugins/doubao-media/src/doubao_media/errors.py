@@ -9,6 +9,13 @@ from __future__ import annotations
 
 from typing import Any
 
+# Upstream gateway / business error codes worth recognising by name.
+# Declared before the exception classes because several defaults reference them.
+CODE_AUTH_EXPIRED = 710012001
+CODE_PERMISSION_DENIED = 710012000
+CODE_RATE_LIMITED = 710022002
+CODE_RISK_CONTROL = 710022004
+
 
 class DoubaoError(RuntimeError):
     """Base class for every error raised by this package."""
@@ -42,7 +49,25 @@ class DoubaoAuthRequired(DoubaoError):
 
 # G   i tHub@AprismLab | Ap rismLa   b   @  Star  sail   sC  l   o   v   er
 class DoubaoRateLimited(DoubaoError):
-    """Upstream applied rate limiting (710022002 family)."""
+    """Upstream applied a plain frequency block (``710022002``).
+
+    Observed payload: ``{"code":710022002,"message":"block",
+    "error_detail":{...,"message":"当前服务访问频繁，请稍后重试"}}``.
+
+    Crucially this carries **no** verification challenge, so it cannot be
+    solved - only waited out.  Retrying prolongs it, which is why the caller is
+    expected to stop rather than loop.
+    """
+
+    def __init__(self, message: str = "", *, code: int | str | None = CODE_RATE_LIMITED,
+                 payload: Any = None) -> None:
+        super().__init__(
+            message
+            or "Doubao is throttling this account/session (710022002). "
+               "No challenge can be solved; wait before retrying.",
+            code=code,
+            payload=payload,
+        )
 
 
 class DoubaoRiskControl(DoubaoError):
@@ -53,9 +78,29 @@ class DoubaoRiskControl(DoubaoError):
         message: str = "Doubao risk control triggered; manual verification required",
         *,
         verify_url: str = "",
+        report: Any = None,
     ) -> None:
         super().__init__(message, code=710022004)
         self.verify_url = verify_url
+        #: Optional :class:`doubao_media.verify.RiskControlReport`.  Kept as
+        #: ``Any`` so this module stays free of import cycles; callers that need
+        #: the challenge ask the report for it.
+        self.report = report
+
+    @property
+    def challenge(self) -> Any:
+        """The parsed verification challenge, when the payload carried one."""
+        return getattr(self.report, "challenge", None)
+
+    @property
+    def is_frequency_block(self) -> bool:
+        return bool(getattr(self.report, "is_frequency_block", False))
+
+    def as_dict(self) -> dict[str, Any]:
+        data = super().as_dict()
+        if self.report is not None:
+            data["riskControl"] = self.report.to_dict()
+        return data
 
 
 class DoubaoUpstreamError(DoubaoError):
@@ -88,10 +133,3 @@ class DoubaoQuotaExhausted(DoubaoError):
 # G   itH ub@Ap  ri  sm L  ab | Ap  r i  s  mLab@St arsailsClove r
 class DoubaoTimeout(DoubaoError):
     """An async generation task did not finish inside the allowed window."""
-
-
-# Upstream gateway / business error codes worth recognising by name.
-CODE_AUTH_EXPIRED = 710012001
-CODE_PERMISSION_DENIED = 710012000
-CODE_RATE_LIMITED = 710022002
-CODE_RISK_CONTROL = 710022004

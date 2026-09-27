@@ -175,57 +175,105 @@ Read shape: `data.config_map["1"].watermark_option.is_on`.
 
 ---
 
-## 5 Risk control (`710022004`) — the one unsolved problem
-<!-- GitHub@ Apr is   mLa b | Aprism   Lab@ Sta rsails  Clove   r -->
+## 5 Risk control - two distinct forms
 
-### 5.1 Symptom
+Any generation call answers HTTP 200 with a single SSE error frame. There are
+**two** forms and they must not be conflated.
 
-Any generation call answers HTTP 200 with a single SSE frame:
+### 5.1 Form A - `710022004`, a solvable challenge
 
-```json
-{"event_type": 2005, "event_data": "{\"code\":710022004,
- \"message\":\"rate limited\",
- \"error_detail\":{\"code\":710022004,\"message\":\"系统错误\",
-   \"ext\":{\"decision\":\"{\\\"code\\\":\\\"10000\\\",\\\"from\\\":\\\"shark_admin\\\",
-     \\\"type\\\":\\\"verify\\\",\\\"subtype\\\":\\\"semantic_reasoning\\\",
-     \\\"verify_scene\\\":\\\"doubao_message_web\\\", ...}\"}}}"}
+The payload carries a complete verification instruction:
+
+```
+{"event_type": 2005, "event_data": "{\"code\":710022004, \"message\":\"rate limited\",
+ \"error_detail\":{\"code\":710022004,\"message\":\"\u7cfb\u7edf\u9519\u8bef\",
+  \"ext\":{\"decision\":\"{\\\"code\\\":\\\"10000\\\",\\\"from\\\":\\\"shark_admin\\\",
+   \\\"type\\\":\\\"verify\\\",\\\"subtype\\\":\\\"slide\\\",
+   \\\"verify_scene\\\":\\\"doubao_message_web\\\",\\\"log_id\\\":\\\"...\\\"}\"}}}"}
 ```
 
+`subtype` has been observed as `slide` and as `semantic_reasoning`. The
+`decision` object is exactly what Doubao's own verifier consumes as
+`verify_data`.
+
+### 5.1.1 The first-party verification entry point
+
+The loaded page exposes the integration point the product itself uses:
+
+```
+window.verifyCenter  ->  init | initVerifyCenter | initVerifyOptions
+                         autoRender | renderCaptcha | renderSecondVerifyWeb
+                         closeCaptcha | getCaptchaWebId | SMS
+window.__VERIFY_CENTER_RUNTIME__  ->  myOptions | myFp | myVerify | mySMS
+```
+
+Call shape, confirmed from the bundled `106.js`:
+
+```js
+verifyCenter.initVerifyOptions({commonOptions: {aid, pageId},
+                                captchaOptions: {fp, ...}})
+verifyCenter.renderCaptcha({verify_data, captchaOptions: {successCb, closeCb,
+                            errorCb}, secondVerifyWebOptions: {scene: "4", ...}})
+```
+
+`verify_data` is the **parsed `decision` object** (the SDK reads `.region`,
+`.log_id` and `.fp` from it). Passing only `decision.detail` is wrong: the SDK
+then attempts `JSON.parse` on the opaque blob.
+
+### 5.2 Form B - `710022002`, a plain frequency block
+
+No `decision`, no challenge:
+
+```
+{"code": 710022002, "message": "block",
+ "error_detail": {"code": 710022002,
+                  "message": "\u5f53\u524d\u670d\u52a1\u8bbf\u95ee\u9891\u7e41\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5"}}
+```
+
+Form B is **self-inflicted by over-calling** and cannot be solved - only waited
+out. It appeared in this project after repeated generation probing, which is why
+the skill now forbids batching and retry loops.
+
 Read-only endpoints (`user_config`, `subscription/*`, `watermark_config`) are
-**not** affected, which is why the plan/quota/watermark features work today.
+unaffected by either form, which is why the plan/quota/watermark features work
+regardless.
 
-### 5.2 What was tested
+### 5.3 What is *not* the cause
 
-| Variant | Result |
-|---------|--------|
-| Plain `httpx` POST with the full cookie set | `710022004` |
-| Playwright Chromium, in-page `fetch`, headless | `710022004` |
-| Playwright Chromium, in-page `fetch`, headful | `710022004` |
-| Microsoft Edge channel, in-page `fetch`, headful | `710022004` |
-| After adding the `.bytedance.com` `msToken` to the cookie set | `710022004` |
-| Device-param variants (`device_id`, `web_id`, `tea_uuid`, `fp`) | `710022004` |
-| Session taken directly from the logged-in desktop client | `710022004` |
+Both obvious explanations were tested and rejected:
 
-The page itself is healthy in every variant: `fetch` is hooked and
-`window.bdms.frontierSign` is a function, so `a_bogus` *is* attached.
-`subtype = semantic_reasoning` indicates a server-side behaviour/content model
-rather than the slider captcha path.
+| Hypothesis | Verdict | Evidence |
+|---|---|---|
+| Foreign egress IP is distrusted | **Rejected** | Clash routes by rule: domestic hosts go **direct**. Measured with a domestic echo: the Doubao path egresses from Guangzhou Telecom, and `www.doubao.com` resolves to domestic CDN IPs (`113.96.150.x`, `183.60.205.x`, `183.61.231.x`). Only foreign hosts (e.g. `api.ipify.org`) take the Tokyo route. |
+| The request lacks a signature | **Rejected** | `window.bdms.frontierSign(query)` returns `{"X-Bogus":"..."}`; attaching it explicitly changes nothing. |
 
-### 5.3 Conclusion
+The block is also **not modality-specific**: a plain text completion
+(`content_type: 2001`, no image request at all) is refused identically, so this
+is not an image-entitlement problem.
 
-The block is account- or device-level risk scoring that a fresh browser context
-cannot clear immediately.  Two credible paths remain, neither implemented:
+Earlier variants, all reproducing the same result, are retained here for
+completeness: plain `httpx`; headless Chromium in-page `fetch`; headful
+Chromium; the Edge channel; after adding the `.bytedance.com` `msToken`; with
+`device_id` / `web_id` / `tea_uuid` / `fp` supplied; and using the desktop
+client's own session.
 
-1. **Reuse the client's own profile** so the browser context *is* the trusted
-   device (the reference implementation's `launch_persistent_context` against a
-   profile the user has actually used).
-2. **First-party risk attribution** — carry the exact headers and parameters the
-   official client sends and let a session warm up before generating.
+### 5.4 Conclusion and honest status
 
-`transport_mode="browser"` and `DOUBAO_MEDIA_BROWSER_PROFILE` exist so path 1
-can be pursued without further refactoring.
+Form A is recoverable: `doubao_verify_challenge` drives `window.verifyCenter` in
+a visible window for the account holder to solve, after which one retry is
+permitted. Form B is not recoverable and must be waited out.
 
----
+`doubao_verify_challenge` is implemented against the first-party entry point but
+was **not exercised end-to-end**, because doing so would have required
+generating while the account was already under Form B. The render path is
+therefore verified only as far as the SDK hand-off.
+
+### 5.5 Operational rule
+
+Do **not** use live generation calls for exploratory probing - that is exactly
+what produced Form B. Prefer the bundled-asset tooling (`extract_api.py`,
+`g2.py`) for protocol work, and issue at most one generation per user request.
+
 
 ## 6 Security and privacy notes
 

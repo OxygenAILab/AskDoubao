@@ -22,7 +22,7 @@ from typing import Any
 from mcp.server.mcpserver import MCPServer
 
 from ..endpoints import WATERMARK_SETTINGS_ROUTE
-from ..errors import DoubaoError
+from ..errors import DoubaoError, DoubaoRateLimited, DoubaoRiskControl
 from ..models import WatermarkRequest
 from ..pipeline import MediaPipeline
 from ..session import (
@@ -33,6 +33,7 @@ from ..session import (
     load_session,
     save_session,
 )
+from ..verify import VerificationSolver
 
 SERVER_NAME = "doubao-media"
 DEFAULT_OUTPUT_DIR = Path.home() / "Documents" / "DoubaoMedia"
@@ -57,6 +58,43 @@ def _error_payload(exc: Exception) -> dict[str, Any]:
     return {"error": type(exc).__name__, "message": str(exc), "code": None, "payload": None}
 
 
+def _risk_control_hint(exc: Exception) -> dict[str, Any]:
+    """Translate a risk-control error into actionable guidance.
+
+    Two cases must never be conflated:
+
+    * a *verifiable* challenge (``710022004``) - the user can clear it, so we
+      tell the agent to call ``doubao_verify_challenge`` with the returned
+      challenge;
+    * a plain frequency block (``710022002``) - nothing to solve, so we tell the
+      agent to stop and wait.
+    """
+    if isinstance(exc, DoubaoRiskControl):
+        report = getattr(exc, "report", None)
+        challenge = getattr(report, "challenge", None)
+        return {
+            "kind": "verification_required",
+            "recoverable": bool(challenge),
+            "nextStep": (
+                "Call doubao_verify_challenge with the challenge object; a window "
+                "opens for the user to complete the check, then retry the "
+                "generation once."
+            ),
+            "challenge": challenge.to_dict() if challenge else None,
+        }
+    if isinstance(exc, DoubaoRateLimited):
+        return {
+            "kind": "frequency_block",
+            "recoverable": False,
+            "nextStep": (
+                "Doubao is throttling this account/session and no challenge "
+                "exists to solve. Stop calling - retrying prolongs the block. "
+                "Tell the user to wait and try again later."
+            ),
+        }
+    return {"kind": "none"}
+
+
 def _watermark_request(
     mode: str | None, *, confirm: bool, restore_after: bool
 ) -> WatermarkRequest:
@@ -65,6 +103,38 @@ def _watermark_request(
 
 # G itHub   @Apr is  m   Lab | Aprism La  b@Star s ailsClover
 # GitHu   b   @ A  pr ism   L   a  b | Ap  r is mL  ab @StarsailsCl   o  ve   r
+class _PendingChallenge:
+    """Holds the most recent verification challenge.
+
+    Lets ``doubao_verify_challenge`` run as its own tool call without having to
+    re-issue (and re-throttle) a generation request first.
+    """
+
+    def __init__(self) -> None:
+        self.value: dict[str, Any] | None = None
+
+
+_PENDING_CHALLENGE = _PendingChallenge()
+
+
+def _failure(exc: Exception) -> dict[str, Any]:
+    """Uniform failure envelope that also explains risk control.
+
+    A *verifiable* challenge is stashed so the agent can hand it straight to
+    ``doubao_verify_challenge``; a plain *frequency block* yields explicit
+    "stop calling" guidance, because no amount of retrying will help.
+    """
+    result: dict[str, Any] = {"ok": False, **_error_payload(exc)}
+    hint = _risk_control_hint(exc)
+    if hint["kind"] == "none":
+        return result
+    result["riskControl"] = hint
+    challenge = hint.get("challenge")
+    if challenge:
+        _PENDING_CHALLENGE.value = challenge
+    return result
+
+
 def build_server() -> MCPServer:
     """Construct the server with the media-only tool surface."""
     server: MCPServer = MCPServer(
@@ -216,7 +286,7 @@ def build_server() -> MCPServer:
                 )
                 return {"ok": True, **outcome.to_dict()}
         except Exception as exc:  # noqa: BLE001
-            return {"ok": False, **_error_payload(exc)}
+            return _failure(exc)
 
     @server.tool(
         name="doubao_generate_video",
@@ -264,7 +334,7 @@ def build_server() -> MCPServer:
                 )
                 return {"ok": True, **outcome.to_dict()}
         except Exception as exc:  # noqa: BLE001
-            return {"ok": False, **_error_payload(exc)}
+            return _failure(exc)
 
     @server.tool(
         name="doubao_watermark_opt_out",
@@ -308,6 +378,56 @@ def build_server() -> MCPServer:
 
     # G   itH ub  @   Apr   is  m L  a   b | Ap   rismL ab@  St a rs ail   sCl   ove r
     # Gi tH u   b@   A   pri s  mLab | Apri   sm  Lab@Sta   r   sa   ils Clover
+    @server.tool(
+        name="doubao_verify_challenge",
+        description=(
+            "Open the Doubao security check in a VISIBLE browser window so the user "
+            "can complete it, then report the outcome. Call this when a generation "
+            "tool returns riskControl.kind='verification_required'; a window will "
+            "appear and the user must act. Do NOT call it for "
+            "kind='frequency_block' - that carries no solvable challenge and only "
+            "waiting helps. Pass the challenge object from the failed call, or omit "
+            "it to reuse the most recent one."
+        ),
+    )
+    async def doubao_verify_challenge(
+        challenge: dict[str, Any] | None = None,
+        timeout_seconds: float = 300,
+    ) -> dict[str, Any]:
+        from ..verify import VerificationChallenge
+
+        payload = challenge or _PENDING_CHALLENGE.value
+        if not payload:
+            return {
+                "ok": False,
+                "error": "no_challenge",
+                "message": (
+                    "No verification challenge is pending. Trigger one by calling a "
+                    "generation tool first, or pass the challenge object explicitly."
+                ),
+            }
+        try:
+            session = _resolve_session()
+            parsed = VerificationChallenge(
+                detail=str(payload.get("detail") or ""),
+                subtype=str(payload.get("subtype") or ""),
+                verify_scene=str(payload.get("verifyScene") or ""),
+                host=str(payload.get("host") or ""),
+                aid=str(payload.get("aid") or ""),
+                log_id=str(payload.get("logId") or ""),
+            )
+            solver = VerificationSolver(
+                session.slim_cookies(),
+                cookie_domains=session.cookie_domains,
+                timeout=timeout_seconds,
+            )
+            outcome = await solver.solve(parsed)
+            if outcome.get("ok"):
+                _PENDING_CHALLENGE.value = None
+            return outcome
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, **_error_payload(exc)}
+
     return server
 
 

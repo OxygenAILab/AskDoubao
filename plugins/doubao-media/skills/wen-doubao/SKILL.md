@@ -39,6 +39,10 @@ this skill does not do it.
 
 > **Budget honesty.** Both generation tools spend the user's Doubao quota. Say
 > so before calling them, and never loop generation calls to "try again".
+>
+> **Throttling honesty.** Doubao blocks aggressive callers (`710022002`). Issue
+> one generation per user request, never a batch or a retry loop. If a block
+> appears, stop and tell the user to wait; see §6.2.
 
 ## 2 Preflight (always)
 
@@ -49,6 +53,18 @@ this skill does not do it.
    image, then poll with **`doubao_login_poll`**.
 3. If `runningLow.image` or `runningLow.video` is true, tell the user before
    spending the remaining quota.
+
+### Tool surface
+
+| Tool | Spends quota? | Purpose |
+|------|---------------|---------|
+| `doubao_status` | no | plan tier, image/video quota, next reset |
+| `doubao_watermark_status` | no | read the watermark opt-out switches |
+| `doubao_login_start` / `doubao_login_poll` | no | adopt a local session, or scan a QR code |
+| `doubao_generate_image` | **yes** | generate and save an image |
+| `doubao_generate_video` | **yes** | generate and save a video (scarcest quota) |
+| `doubao_watermark_opt_out` | no | change the watermark switch (removal needs confirmation) |
+| `doubao_verify_challenge` | no | open Doubao's security check for the user to solve |
 
 ### Reading the status payload
 
@@ -148,35 +164,68 @@ Map the returned `error` directly:
 | Returned error | Meaning | What to do |
 |----------------|---------|------------|
 | `DoubaoAuthRequired` | session missing or expired | run the login flow (§2.2) |
-| `DoubaoRiskControl` | `710022004`: known, see §6 | report honestly, do not retry blindly |
+| `DoubaoRiskControl` | `710022004`: a **solvable** security check | go to §6.1 |
+| `DoubaoRateLimited` | `710022002`: plain **frequency block** | go to §6.2 — stop calling |
 | `DoubaoQuotaExhausted` | quota gone for that modality | report `nextReset`, offer `upgrade.url` |
 | `DoubaoEntitlementDenied` | plan does not cover the request | report `upgrade.name` / `jumpUrl` |
 | `DoubaoTimeout` | async task did not finish | report the elapsed time; do not auto-retry |
 | `DoubaoUpstreamError` | anything else | quote the message verbatim |
 
-Never retry a quota or entitlement failure. One retry is acceptable *only* for
-a pure network error.
+Never retry a quota, entitlement, or **rate-limit** failure. One retry is
+acceptable *only* for a pure network error.
 
-## 6 Known limitation — risk control (`710022004`)
+## 6 Risk control
 
-Doubao may answer a generation request with
-`{"code":710022004,"message":"rate limited"}` together with
-`ext.subtype = "semantic_reasoning"` and `verify_scene = "doubao_message_web"`.
+Risk control has **two distinct forms**, and confusing them is how an agent
+burns an account. The failed call tells you which one you have: read
+`riskControl.kind` in the returned payload.
 
-This is a server-side risk decision on the account/device. It is **not** caused
-by a missing signature: the request carries a valid `X-Bogus`, and read-only
-endpoints on the same session keep working. It was reproduced identically
-through plain HTTPS, through headless Chromium, through headful Chromium,
-through the Edge channel, and with the desktop client's own session.
+### 6.1 `verification_required` — solvable, once
 
-When this happens:
+```json
+{"riskControl": {"kind": "verification_required", "recoverable": true,
+                 "challenge": {"subtype": "slide", "hint": "拖动滑块完成拼图"}}}
+```
 
-1. Tell the user the account is under Doubao risk control, quoting the code.
-2. Suggest opening the Doubao client once and completing any verification it
-   shows, then retrying later.
-3. Fall back to another generator, or ask the user how to proceed.
+Payload: `710022004` / `"rate limited"` carrying
+`ext.decision = {type: "verify", subtype: ..., detail: "<blob>"}`.
 
-Do not present this as a bug in the request we build, and do not loop.
+This is a **challenge, not a ban**. It is *not* caused by a missing signature:
+the request carries a valid `X-Bogus`, and read-only endpoints keep working.
+
+**Do this — in order, once:**
+
+1. Call `doubao_verify_challenge` (optionally passing the returned `challenge`).
+   A browser window opens showing Doubao's own verification widget.
+2. Tell the user plainly: *"豆包要求完成一次安全验证，请在弹出的窗口中操作。"*
+   Wait for the tool to report `ok: true`.
+3. Retry the generation **exactly once**. If it succeeds, continue normally.
+4. If it fails again, surface it and stop — do not enter a retry loop.
+
+Never attempt to automate the challenge itself. `subtype` may be `slide`
+(slider puzzle) or `semantic_reasoning`; both must be solved by the account
+holder, which is also what Doubao's own UI requires.
+
+### 6.2 `frequency_block` — not solvable, only waitable
+
+```json
+{"riskControl": {"kind": "frequency_block", "recoverable": false,
+                 "nextStep": "Stop calling - retrying prolongs the block."}}
+```
+
+Payload: `710022002` / `"block"` /
+`"当前服务访问频繁，请稍后重试"`, with **no** `decision` object.
+
+There is no challenge to solve: the account or session is being throttled for
+calling too often. **The only correct action is to stop.** Do not call
+`doubao_verify_challenge`, do not retry, do not loop — every extra request makes
+it worse.
+
+Tell the user: *"豆包当前限制了访问频率（710022002），需要等待一段时间。这不是可以立即解决的验证，请稍后再试。"* Then fall back to another
+generator, or ask how they want to proceed.
+
+> This form is **self-inflicted by over-calling**. Treat it as a signal that the
+> generation loop was too aggressive; back off rather than trying harder.
 
 ## 7 Reference
 

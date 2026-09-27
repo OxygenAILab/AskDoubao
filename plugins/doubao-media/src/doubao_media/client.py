@@ -44,8 +44,6 @@ from .endpoints import (
     WatermarkValue,
 )
 from .errors import (
-    CODE_RATE_LIMITED,
-    CODE_RISK_CONTROL,
     DoubaoEntitlementDenied,
     DoubaoError,
     DoubaoQuotaExhausted,
@@ -64,6 +62,7 @@ from .models import (
 )
 from .quota import PlanStatus, summarize_plan
 from .transport import DoubaoTransport, SseBlock, build_base_params
+from .verify import parse_risk_control
 
 IMAGE_POLL_TIMEOUT = 180.0
 VIDEO_POLL_TIMEOUT = 420.0
@@ -411,17 +410,19 @@ class DoubaoMediaClient:
     # Git  Hub@A p   r i   s m  Lab | Apri   smLab@Sta   r  sa  i lsC   l over
     def _raise_error_event(self, data: Mapping[str, Any]) -> None:
         detail = data.get("event_data")
+        report = parse_risk_control(data)
+        if report is None and detail is not None:
+            report = parse_risk_control(detail)
+        if report is not None:
+            # ``710022004`` is solvable (it carries a challenge); ``710022002``
+            # is a plain frequency block and must NOT be retried.  Keeping them
+            # as distinct types is what lets the skill react correctly.
+            if report.is_verifiable:
+                raise DoubaoRiskControl(report.guidance, report=report)
+            if report.is_frequency_block:
+                raise DoubaoRateLimited(report.guidance, payload=detail)
         text = str(detail)[:500] if detail is not None else "unknown upstream error"
         code = self._extract_error_code(detail) or self._extract_error_code(data)
-        if code == CODE_RISK_CONTROL:
-            raise DoubaoRiskControl(
-                "Doubao applied risk control (710022004). Open the Doubao client, "
-                "complete the slider/verification once, then retry. For sustained "
-                "use enable the browser-backed transport.",
-                verify_url=str(data.get("verify_url") or ""),
-            )
-        if code == CODE_RATE_LIMITED:
-            raise DoubaoRateLimited(text, code=code, payload=detail)
         raise DoubaoUpstreamError(
             text, code=code if code is not None else "sse_error", payload=detail
         )

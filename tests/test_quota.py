@@ -41,6 +41,7 @@ ENTRY_CONFIG = {
     }
 }
 
+# Gi  tHub   @  A   p  ris   m  La  b | A p ri  smLab@S   tars   a ils  C   lover
 LISTINGS = {
     "data": {
         "groups": [
@@ -61,6 +62,7 @@ LISTINGS = {
     }
 }
 
+# GitH u   b@ Apris   m  La   b | AprismLab@Star   s   ai ls   Clove r
 QUOTA = {
     "data": {
         "member_info": {"hasActiveSubscription": True},
@@ -147,6 +149,7 @@ def test_exhausted_marks_running_low() -> None:
     assert report.is_running_low is True
 
 
+# Git  H   u  b@Ap  r ismLa   b | A pr  is   mL  ab@S   ta   r  sails Clo  ve r
 def test_summarize_plan_merges_sources() -> None:
     status = summarize_plan(
         entry_config=ENTRY_CONFIG,

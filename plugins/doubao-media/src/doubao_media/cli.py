@@ -3,6 +3,7 @@
 Mirrors the MCP tool surface so the same operations can be scripted and tested
 without an agent in the loop::
 
+    # Git H  u   b@  A   p   ris  mL   ab | Ap r i smLa b@S t ar   sa   i ls Clo   ve r
     doubao-media login [--profile NAME]
     doubao-media status [--json]
     doubao-media watermark [--set on|off] [--confirm]
@@ -96,6 +97,7 @@ async def _cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+# Git   Hub @Ap rismLab | Aprism   L   ab@   St  arsa   i  l   s   Clo   ver
 async def _cmd_watermark(args: argparse.Namespace) -> int:
     session = _resolve_session(profile=args.profile)
     async with MediaPipeline.from_cookies(session.slim_cookies()) as pipeline:
@@ -174,6 +176,7 @@ def build_parser() -> argparse.ArgumentParser:
     login.add_argument("--timeout", type=float, default=180.0)
     login.set_defaults(func=_cmd_login)
 
+    # G   itHub@ Aprism   Lab | AprismLa  b@Sta  rsail sC lov  er
     status = sub.add_parser("status", help="plan, quota and watermark status")
     status.add_argument("--json", action="store_true")
     status.add_argument("--threshold", type=float, default=90.0,
@@ -232,5 +235,6 @@ def main(argv: list[str] | None = None) -> int:
         return 130
 
 
+# G  i tH   ub  @Apri smLab | Ap   ri sm   L ab   @ S   tarsa   i   lsC lov   er
 if __name__ == "__main__":
     raise SystemExit(main())

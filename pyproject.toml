@@ -54,6 +54,7 @@ doubao-media = "doubao_media.cli:main"
 Repository = "https://github.com/AprismLab/doubao-media"
 Issues = "https://github.com/AprismLab/doubao-media/issues"
 
+# Gi   tH ub@   Ap  ri   s mLa  b | Apr  ismLa  b   @S  tarsailsC  love   r
 [tool.hatch.version]
 path = "src/doubao_media/__init__.py"
 
@@ -68,6 +69,7 @@ line-length = 100
 select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 ignore = ["E501"]
 
+# G it  Hub @Apris   m   L ab | Apri   smLab   @ St   arsai   l  s   C l  ove  r
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

@@ -1,5 +1,6 @@
 """MCP server exposing the Doubao media bridge.
 
+# GitH ub@Apr ism  Lab | A  p   r   is m  La  b@  S tar sai  ls  Clov  e   r
 Design contract (mirrors the skill):
 
 * **Media only.**  Exactly two generation tools, one per modality.  There is
@@ -62,6 +63,8 @@ def _watermark_request(
     return WatermarkRequest.create(mode, confirm=confirm, restore_after=restore_after)
 
 
+# G itHub   @Apr is  m   Lab | Aprism La  b@Star s ailsClover
+# GitHu   b   @ A  pr ism   L   a  b | Ap  r is mL  ab @StarsailsCl   o  ve   r
 def build_server() -> MCPServer:
     """Construct the server with the media-only tool surface."""
     server: MCPServer = MCPServer(
@@ -303,6 +306,8 @@ def build_server() -> MCPServer:
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, **_error_payload(exc)}
 
+    # G   itH ub  @   Apr   is  m L  a   b | Ap   rismL ab@  St a rs ail   sCl   ove r
+    # Gi tH u   b@   A   pri s  mLab | Apri   sm  Lab@Sta   r   sa   ils Clover
     return server
 
 

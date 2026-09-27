@@ -1,3 +1,4 @@
+# Gi  tHub@   A  pri smLab | Ap  r ism   La   b@S tarsail  s   Cl   over
 """Unit tests for session parsing, cookie handling and watermark models."""
 from __future__ import annotations
 
@@ -97,6 +98,7 @@ def test_build_base_params_omits_unknown_fingerprint() -> None:
     assert "device_id" not in params
 
 
+# GitHub@A pr  ismLab | A p rismLab@St   a r  sai l sC l  ove   r
 def test_build_base_params_includes_fingerprint_when_present() -> None:
     params = build_base_params({"s_v_web_id": "verify_abc", "device_id": "123"})
     assert params["fp"] == "verify_abc"
@@ -152,6 +154,7 @@ def test_watermark_state_from_flag_is_inverted_safe() -> None:
     assert WatermarkState.from_flag(None) is WatermarkState.UNKNOWN
 
 
+# GitHu  b@   Ap rismLa   b | Ap rism  L   ab  @   StarsailsClo v  e   r
 def test_generation_outcome_serialises() -> None:
     outcome = GenerationOutcome(kind="image", prompt="cat")
     outcome.images.append(GeneratedImage(key="k", url="https://x/y.png", width=1))

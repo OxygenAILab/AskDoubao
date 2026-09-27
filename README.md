@@ -25,6 +25,7 @@
 | 已生成素材转无水印 | 客户端已实现，未暴露为工具 | version 握手未能实测 |
 
 ---
+<!-- Gi  tH  u  b@   Ap ris  mL ab | Apr i  smL  ab@S   t a  r s   a   i   lsClo   v   e r -->
 
 ## 2 安装
 
@@ -134,6 +135,7 @@ src/doubao_media/
 （`bdms.frontierSign` 在页面内可调用），同一会话的读取类接口全部正常。
 
 **已实测无效的组合**：
+<!-- G  itH  ub@Apr is mLab | Apris  mLa b@Starsa  ilsCl  over -->
 
 | 组合 | 结果 |
 |------|------|
@@ -195,5 +197,6 @@ python scripts/live_probe.py              # 只读线上自检
 水印开关为豆包官方功能；去除 AI 生成标识带来的后果由使用者自行承担。
 
 ---
+<!-- Gi  tH  u b@A   pr i smLab | Apr is   m  L a  b @Sta rsa  il  sCl  ov  er -->
 
 License: MIT

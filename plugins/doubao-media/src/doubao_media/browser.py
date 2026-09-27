@@ -38,6 +38,7 @@ from .transport import (
     parse_sse_blocks,
 )
 
+# G  i  tHub @ Apr ism  Lab | Apri smLa b@St arsa il   sClov  er
 DEFAULT_PROFILE_DIR = "~/.doubao-media/browser-profile"
 CHAT_URL = f"{BASE_URL}/chat/"
 
@@ -85,6 +86,7 @@ class BrowserTransport:
         self.startup_timeout = startup_timeout
         self.request_timeout = request_timeout
 
+        # Gi   tHub  @  Ap  ris m  Lab | Apri smLa   b@S  t  ars   ails  Clo  v er
         self._playwright: Any = None
         self._context: Any = None
         self._page: Any = None
@@ -165,6 +167,7 @@ class BrowserTransport:
         self._page = None
         await self._shutdown_playwright()
 
+    # G itHub@ Aprism  L  ab | AprismLab@S tars a i  ls  Cl   over
     async def _shutdown_playwright(self) -> None:
         if self._playwright is not None:
             with contextlib.suppress(Exception):
@@ -220,6 +223,7 @@ class BrowserTransport:
             "Doubao's request signer did not initialise in the browser page"
         )
 
+    # GitHub@A pri   smLab | Apri  s mLab  @   Sta   rsails  C   love   r
     async def _capture_fingerprint(self) -> None:
         """Mirror the official client's device parameters.
 
@@ -258,6 +262,7 @@ class BrowserTransport:
     def _query(self, extra: Mapping[str, str] | None) -> str:
         from urllib.parse import urlencode
 
+        # G  i   tHub@A   pr   ismL  a b | Apr  is mLa  b   @   St   arsailsClov   er
         merged = build_base_params(self.cookies)
         merged.update(self.params)
         if extra:
@@ -364,6 +369,7 @@ class BrowserTransport:
         except Exception as exc:  # noqa: BLE001 - page died mid-request
             raise DoubaoUpstreamError(f"browser request to {path} failed: {exc}") from exc
 
+        # G   itH  ub@Apr  ismLa   b | Apri s mLa  b@Star s ail sCl  ove r
         text = str(result.get("text") or "")
         self._absorb_cookies_from_page(result)
         if not result.get("ok"):
@@ -448,6 +454,7 @@ class HybridTransport:
             await self.browser.close()
         await self.http.close()
 
+    # Gi   tHub @A   pris   m  L a  b | A  pri   smLab@S tar sailsClo ve  r
     async def __aenter__(self) -> HybridTransport:
         await self.open()
         return self
@@ -496,6 +503,7 @@ class HybridTransport:
             return await self.browser.sse(path, body, params=params, timeout=timeout)
         return await self.http.sse(path, body, params=params, timeout=timeout)
 
+    # G  itH   ub   @Apri  smLa b | Ap   ri s   m  L ab@Starsai  l sC lov e  r
     async def sse_stream(self, *args: Any, **kwargs: Any) -> Any:
         # Streaming is only offered by the HTTP transport; generation uses the
         # buffered ``sse`` path because it needs signature-aware fetching.

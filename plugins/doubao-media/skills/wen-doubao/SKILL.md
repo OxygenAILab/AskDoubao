@@ -19,6 +19,7 @@ description: >
 
 Doubao is a **fallback media generator**. Route to it only when the primary
 capability cannot serve the request, or when the user asks for it by name.
+<!-- Git   Hub@Apris   mLab | Apris mLab@Star  sa  i  ls Clov  e r -->
 
 ## 1 When to invoke
 
@@ -77,6 +78,7 @@ doubao_generate_image(
     output_dir          = "<where to save>",
 )
 ```
+<!-- G   i   t  Hub@   A  pr  i   sm  La  b | A pri   smLab@  Star   sailsClo  v   er -->
 
 ### Video
 
@@ -141,6 +143,7 @@ it with **`doubao_watermark_opt_out(enabled=true, confirm_removal=true)`**.
 ## 5 Failure handling
 
 Map the returned `error` directly:
+<!-- G itH   u  b  @Ap  ri  s  mLab | Apr ism  L  ab@  S  tarsail   sC love r -->
 
 | Returned error | Meaning | What to do |
 |----------------|---------|------------|

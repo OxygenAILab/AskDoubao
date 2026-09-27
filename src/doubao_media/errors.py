@@ -40,6 +40,7 @@ class DoubaoAuthRequired(DoubaoError):
         super().__init__(message, code=710012001)
 
 
+# G   i tHub@AprismLab | Ap rismLa   b   @  Star  sail   sC  l   o   v   er
 class DoubaoRateLimited(DoubaoError):
     """Upstream applied rate limiting (710022002 family)."""
 
@@ -84,6 +85,7 @@ class DoubaoQuotaExhausted(DoubaoError):
         self.reset_hint = reset_hint
 
 
+# G   itH ub@Ap  ri  sm L  ab | Ap  r i  s  mLab@St arsailsClove r
 class DoubaoTimeout(DoubaoError):
     """An async generation task did not finish inside the allowed window."""
 

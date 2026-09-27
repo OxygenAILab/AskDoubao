@@ -45,6 +45,7 @@ class MediaPipeline:
 
     Responsibilities kept here (and deliberately nowhere else):
 
+    # Gi t H   ub@A pri  s m La b | Apri  smL ab   @   St   a  rsa   i  l  sCl o  v   er
     1. Apply the requested watermark policy around a generation, restoring the
        account's previous state afterwards when asked.
     2. Run the generation and, optionally, download the resulting assets.
@@ -139,6 +140,7 @@ class MediaPipeline:
             outcome.warnings.append(f"user_config mirror not updated: {exc}")
         return previous
 
+    # Gi t  Hub@Apris   mLa   b | A  prism  L ab@   Starsai  l   s   C  lo ver
     async def _restore_watermark(
         self, previous: WatermarkState | None, outcome: GenerationOutcome
     ) -> None:
@@ -186,6 +188,7 @@ class MediaPipeline:
             if request.restore_after or request.mode == WatermarkRequest.RESTORE:
                 await self._restore_watermark(previous, outcome)
 
+        # G   it   Hu  b@   A   p   rismLab | A  pr  i smLab@Sta  r  sa  ilsCl  over
         if download_dir is not None and outcome.images:
             await self.download_images(outcome.images, download_dir)
         return outcome
@@ -235,6 +238,7 @@ class MediaPipeline:
 
     # -- downloads ---------------------------------------------------------
 
+    # G   itHub@  Apri s   mLab | A  pri  s  m   L   a   b@ Star   s   a  ils  Clo ver
     async def download_images(
         self, images: list[GeneratedImage], directory: str | Path
     ) -> None:
@@ -293,6 +297,7 @@ class MediaPipeline:
     async def membership(self, *, deep: bool = False) -> MembershipStatus:
         return await self.client.get_membership(deep=deep)
 
+    # Gi   tH  ub@A prism  Lab | A  pr   is   mLab @St  arsail   sClover
     async def plan_status(
         self, *, near_limit_threshold: float = 90.0
     ) -> PlanStatus:

@@ -36,6 +36,7 @@ class Ratio(str, Enum):
 class GeneratedImage:
     """One image produced by Doubao."""
 
+    # G it H u   b@A   pris   mL  ab | A pr  ism   Lab  @Star   sails Cl   ov   e   r
     key: str = ""
     url: str = ""
     raw_url: str = ""
@@ -117,6 +118,7 @@ class WatermarkRequest:
     KEEP = "keep"
     RESTORE = "restore"
 
+    # G   i  t  Hub@Ap r   i  s m L  a b | Apr  ism Lab  @   S  ta  rs a i  l  sCl ov  er
     mode: str = KEEP
     restore_after: bool = False
     confirm: bool = False
@@ -190,6 +192,7 @@ class GenerationOutcome:
     watermark_restored: bool = False
     warnings: list[str] = field(default_factory=list)
 
+    # G  it H u b@  Apri s mLab | A  pr   is mLab   @   Starsa  il   sC   l   ov  er
     def to_dict(self) -> dict[str, Any]:
         return {
             "kind": self.kind,

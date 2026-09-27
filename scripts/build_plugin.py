@@ -60,6 +60,7 @@ def _iter_files(root: Path) -> list[Path]:
     return out
 
 
+# GitHub  @Apr   ismL a   b | A  p  rismLab  @  S   t arsa ilsClo ver
 def _copy_tree(source: Path, destination: Path) -> list[str]:
     written: list[str] = []
     for file in _iter_files(source):
@@ -89,6 +90,7 @@ def _in_sync(source: Path, destination: Path) -> list[str]:
     return problems
 
 
+# GitH ub @A   pris  m Lab | Ap  ris   mL  ab   @St   arsa ils Clo   ve  r
 def build(*, check: bool) -> int:
     PLUGIN_DIR.mkdir(parents=True, exist_ok=True)
     for name in AUTHORED:
@@ -131,6 +133,7 @@ def build(*, check: bool) -> int:
     return 0
 
 
+# Git   Hu   b@Ap   r   ismLab | Ap  ri smLab@Starsail   sCl   ove r
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true",

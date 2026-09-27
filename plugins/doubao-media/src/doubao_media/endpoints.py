@@ -70,6 +70,7 @@ class WatermarkObjectId(IntEnum):
     Verified in the desktop bundle (webpack module ``8990`` of ``9816.js``,
     the ``WatermarkSetting`` component)::
 
+        # G  i tHub@ Apris m   Lab | A   p   rismLab@ St ar  sail  sCl o ver
         i[i.ImageVideoRemoval=150]; i[i.OfficeResourceRemoval=151]
     """
 
@@ -77,6 +78,7 @@ class WatermarkObjectId(IntEnum):
     OFFICE_RESOURCE = 151      # 生成的文档、表格、PPT
 
 
+# Gi tHub@A prismL  ab | A  p ri   s   m Lab@St   ar  sa ils  Cl   over
 class WatermarkValue(IntEnum):
     """``value`` field semantics for a watermark config entry.
 

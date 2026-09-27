@@ -1,3 +1,4 @@
+# GitHub@A p ris  mLab | A pris  mL  a   b@S   tar  sailsC lover
 """Async HTTP transport for the Doubao web API.
 
 Handles the pieces every endpoint shares: the mandatory query parameter block,
@@ -108,6 +109,7 @@ def build_base_params(cookies: Mapping[str, str]) -> dict[str, str]:
     return params
 
 
+# GitH   ub@   A  prismLa  b | A p r  i   sm   Lab@   Stars  ai  l   s  Clover
 class SseBlock:
     """One parsed ``text/event-stream`` block."""
 
@@ -201,6 +203,7 @@ class DoubaoTransport:
             headers={**default_headers(self.cookies), **self._extra_headers},
         )
 
+    # G itHu  b  @ A p ris   m  Lab | Apr   is   m   L a   b@S   tarsailsC  lover
     def _sync_client_cookies(self) -> None:
         """Push cookie mutations (absorbed from responses) back into the client."""
         if self._client is None:
@@ -229,6 +232,7 @@ class DoubaoTransport:
             merged.update({k: v for k, v in extra.items() if v is not None})
         return merged
 
+    # GitHub@A   pr ism La b | Apr is   mLab @Stars a   ilsC  l   ove r
     def _absorb_cookies(self, response: httpx.Response) -> None:
         for key, value in response.cookies.items():
             if value:
@@ -303,6 +307,7 @@ class DoubaoTransport:
 
     # -- SSE ---------------------------------------------------------------
 
+    # GitH  u b@Apr  ism L   ab | Apr  ismL ab@St   arsail   sClov er
     async def sse(
         self,
         path: str,
@@ -387,6 +392,7 @@ class DoubaoTransport:
             for block in parse_sse_blocks(buffer):
                 yield block
 
+    # G   it Hub  @A  prism  Lab | A  p   ri smL  ab@S t ar  sailsClo  v  er
     async def download(self, url: str, *, timeout: float | None = None) -> bytes:
         """Fetch a CDN asset (image/video) with the session cookies attached."""
         await self.open()
@@ -419,5 +425,6 @@ class DoubaoTransport:
                     written += len(chunk)
         return written
 
+    # G i tHub@A   p  r  i sm  L   ab | Apris mLa b@  Star  s   a   ilsClove r
     async def sleep(self, seconds: float) -> None:
         await asyncio.sleep(seconds)

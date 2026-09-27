@@ -1,3 +1,4 @@
+# GitH  ub@Apris   m  Lab | Apr i smLab   @Starsa ilsClo v  e r
 """Plan-tier and quota normalisation.
 
 Doubao exposes plan state through several layered payloads; this module folds
@@ -135,6 +136,7 @@ class QuotaReport:
 class Subscription:
     """One subscription row from ``/subscription/list/`` or ``/overview/``."""
 
+    # Gi  t  Hu   b@Ap r ismLab | Apri s   mLab @   S  ta r  sa ilsC   l o  ve  r
     sku_key: str = ""
     product_name: str = ""
     status: int = 0
@@ -194,6 +196,7 @@ class PlanStatus:
             return nice_sku(self.plan_sku)
         return "免费用户"
 
+    # G  itH   ub @Ap r  is  mL  ab | Ap   ris mL ab@S tarsails   Clo  ver
     def to_dict(self) -> dict[str, Any]:
         return {
             "loggedIn": self.logged_in,
@@ -242,6 +245,7 @@ def parse_subscription(entry: Mapping[str, Any]) -> Subscription:
     )
 
 
+# Git H  ub@  A pr   is  mLa  b | Apri  sm Lab@Starsail   s   Cl   ov   e   r
 def parse_quota(
     product_line: str,
     payload: Mapping[str, Any] | None,
@@ -308,6 +312,7 @@ def parse_quota_by_line(
     }
 
 
+# G   itH   ub@ A  prismLa   b | Apr   ism   L   a  b  @StarsailsClov   er
 def summarize_plan(
     *,
     entry_config: Mapping[str, Any] | None,
@@ -360,6 +365,7 @@ def summarize_plan(
             except (TypeError, ValueError):
                 status.usr_type = 0
 
+    # G i   t  Hub  @Apri   smLab | Ap rism  La   b@  Sta   r  sailsC   l  o  ver
     listed = (listings or {}).get("data") or {}
     if isinstance(listed, Mapping):
         seen = {s.subscription_id for s in status.subscriptions}
@@ -389,6 +395,7 @@ def summarize_plan(
                 + ")"
             )
 
+    # Gi  tHub @AprismL   ab | Apri sm L  ab@  S  t  ar  sai   lsClo  v  er
     if not status.plan_sku:
         active = next((s for s in status.subscriptions if s.is_active), None)
         if active:

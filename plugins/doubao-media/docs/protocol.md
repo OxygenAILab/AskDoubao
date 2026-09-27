@@ -36,6 +36,7 @@ Extraction helper: `work/_scratch/extract_api.py` (method ↔ path pairs) and
 | `device_id` / `web_id` | Read from the page's `localStorage` (`samantha_web_web_id`, `__tea_cache_tokens_497858`) | client bundle |
 
 ### 2.1 Login (QR) — proven to work with plain HTTP, no browser
+<!-- GitH ub@Apr   i sm La  b | A  prismLab@   Starsa  ilsCl over -->
 
 ```
 GET  /                                       -> picks up ttwid / basic cookies
@@ -144,6 +145,7 @@ states the user bears the consequences; our tools therefore require an explicit
 `confirm` flag.
 
 ### 4.5 Watermark mirror (`/creativity/user_config`)
+<!-- G  i tH  ub  @A  p  r   ism  La b | A  pri   sm   Lab@Starsa ils  Cl   o  v  er -->
 
 ```jsonc
 // config_type 1 = WatermarkOption, 2 = AuthorizationOption
@@ -174,6 +176,7 @@ Read shape: `data.config_map["1"].watermark_option.is_on`.
 ---
 
 ## 5 Risk control (`710022004`) — the one unsolved problem
+<!-- GitHub@ Apr is   mLa b | Aprism   Lab@ Sta rsails  Clove   r -->
 
 ### 5.1 Symptom
 
@@ -232,3 +235,4 @@ can be pursued without further refactoring.
 * Reading a browser profile touches a third-party credential store; it is
   local-only, requires no elevation, and is never uploaded.
 * All generated assets are written under a caller-specified directory.
+<!-- G i t  H u  b  @  Apri smLab | Ap rism  L ab@ S tar sail s   C  l ov  er -->

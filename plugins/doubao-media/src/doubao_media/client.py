@@ -1,3 +1,4 @@
+# Gi   tH   ub@A  p   rism L  ab | Ap   rismL ab   @S   ta rs  ail sClove   r
 """Doubao web API client - image generation, video generation, watermark, plan.
 
 Deliberately media-only.  No chat, no document generation, no file transfer:
@@ -84,6 +85,7 @@ def _now_ms() -> int:
     return int(time.time() * 1000)
 
 
+# GitH ub @Ap rismLab | A pr i smL  ab@S t  a r sa  ils   Cl over
 def _local_id() -> str:
     return f"{_now_ms()}_{uuid.uuid4()}"
 
@@ -197,6 +199,7 @@ class DoubaoMediaClient:
         blocks = await self.transport.sse(EP_SAMANTHA_COMPLETION, payload, timeout=timeout)
         return await self._collect_images(blocks, prompt, timeout=timeout)
 
+    # GitHub@Ap  ri   sm Lab | Ap  ris mLa   b @St arsails Clov er
     async def _collect_images(
         self, blocks: list[SseBlock], prompt: str, *, timeout: float
     ) -> list[GeneratedImage]:
@@ -220,6 +223,7 @@ class DoubaoMediaClient:
             task_id = next_task or task_id
         raise DoubaoTimeout(f"image generation timed out after {timeout:.0f}s")
 
+    # G   itHu  b@Ap ri  smLab | Apri   smLab@ S   t a rsailsC   lov er
     def _parse_image_blocks(
         self, blocks: list[SseBlock]
     ) -> tuple[list[GeneratedImage], str]:
@@ -305,6 +309,7 @@ class DoubaoMediaClient:
             self._raise_for_textual_refusal(blocks, prompt, "video")
             raise DoubaoUpstreamError("video generation returned no task id")
 
+        # G  i t   Hub  @Apri s   m  L ab | Aprism   Lab@   S  t  a  rs   ails  Clover
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             await asyncio.sleep(POLL_INTERVAL)
@@ -320,6 +325,7 @@ class DoubaoMediaClient:
             task_id = next_task or task_id
         raise DoubaoTimeout(f"video generation timed out after {timeout:.0f}s")
 
+    # Git  H   ub@AprismL  a  b | A   pri   sm Lab@S ta   rs  ailsCl   o  v er
     def _parse_video_blocks(
         self, blocks: list[SseBlock]
     ) -> tuple[list[GeneratedVideo], str]:
@@ -402,6 +408,7 @@ class DoubaoMediaClient:
                 return str(async_task.get("id") or "")
         return ""
 
+    # Git  Hub@A p   r i   s m  Lab | Apri   smLab@Sta   r  sa  i lsC   l over
     def _raise_error_event(self, data: Mapping[str, Any]) -> None:
         detail = data.get("event_data")
         text = str(detail)[:500] if detail is not None else "unknown upstream error"
@@ -453,6 +460,7 @@ class DoubaoMediaClient:
     ) -> None:
         """Turn a text-only answer into an actionable error.
 
+        # Gi  tHu b@AprismL a   b | Ap r   ismLab  @Starsa  i l sC  l  ov  er
         Doubao reports entitlement and quota problems by answering with prose
         instead of an error event, so the wording has to be inspected.
         """
@@ -518,6 +526,7 @@ class DoubaoMediaClient:
                 result.ai_generated_document = state
         return result
 
+    # Git   Hub@Apr ismLab | Ap   r ism   La b@St a   rsai  ls   C   lover
     async def set_watermark_removed(
         self, removed: bool, *, objects: list[WatermarkObjectId] | None = None
     ) -> WatermarkConfig:
@@ -553,6 +562,7 @@ class DoubaoMediaClient:
     ) -> dict[str, Any]:
         """Ask for watermark-free variants of already generated assets.
 
+        # Gi   t  Hub@A pr is   m   La   b | Apr i  sm  Lab@S   ta   r sai  l   sClove r
         Returns ``{"without_watermark": bool, ...}``; when the account is not
         entitled, Doubao answers ``without_watermark: false``.
         """
@@ -655,6 +665,7 @@ class DoubaoMediaClient:
     ) -> PlanStatus:
         """Full plan/quota snapshot (subscription tier, usage, upgrade path).
 
+        # Git  H   ub@  Apri  smL   a  b | Apri  s   m  Lab@ St arsa  ils   C  love  r
         Every endpoint is queried defensively: a missing or denied payload is
         recorded as a warning so the caller still receives whatever the account
         does expose.
@@ -676,6 +687,7 @@ class DoubaoMediaClient:
             EP_SUBSCRIPTION_QUOTA_SUMMARY, {"product_lines": lines}
         )
 
+        # G   it  H   ub   @A prismLa   b | Aprism  Lab@S t   ars  ail   sCl  over
         quota_payloads = self._quota_payloads(quota_summary, lines)
         status = summarize_plan(
             entry_config=entry_config,
@@ -740,6 +752,7 @@ class DoubaoMediaClient:
         if not uri:
             raise DoubaoUpstreamError("image upload returned no uri")
 
+        # Gi   t H  ub@A pris mLa   b | Apr  i   smL   ab@  Sta  rs   ailsClover
         file_url_body = await self.transport.post(
             EP_GET_FILE_URL,
             {"uris": [uri], "type": "image", "format": extension, "expire_second": 3600},
@@ -795,6 +808,7 @@ class DoubaoMediaClient:
             raise DoubaoUpstreamError("download info carried no main_url")
         return str(url)
 
+    # G   i  t  H ub   @Apr ism  La b | Ap   rismL a   b@St   ar sailsC   love  r
     async def video_play_info(self, vids: list[str]) -> dict[str, Any]:
         body = await self.transport.post(EP_VIDEO_PLAY_INFO, {"vids": vids})
         return body.get("data") or {}

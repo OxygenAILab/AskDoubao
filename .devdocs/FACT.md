@@ -21,6 +21,7 @@ Files:
 
 ### What's Happened?
 豆包官方"AI 生成水印管理"开关的读写协议被完整定位。
+<!-- Git  Hub @   Ap rismL ab | A p   ri s   m   La  b@  S t a rs   ai   lsC  lov er -->
 
 ### Any evidence?
 1. 官方桌面端自带前端资源中 webpack 模块 `8990`（文件 `9816.js`）即
@@ -147,6 +148,7 @@ Files:
 
 页面自身健康：`window.fetch` 已被 hook，
 `window.bdms.frontierSign(query)` 返回 `{"X-Bogus":"60EurySOS2tUcf5V"}`。
+<!-- GitH ub@A pr  i   smLab | AprismLab@St  ars   ai  lsCl over -->
 
 ### Any Perjury?
 #### Perjury1
@@ -173,6 +175,7 @@ Files:
 2. 读取类接口（`/privacy/*`、`/creativity/user_config/get`、
    `/alice/commerce/*`）在纯 HTTP 下可用。
 3. 优先级最高的后续假设：复用豆包桌面端已使用的浏览器 profile。
+<!-- GitHu b@Ap  r  ismLa   b | Apri   smLa b@   S t   arsa i   ls   Clo  ve  r -->
 
 ### Tags
 risk-control, 710022004, blocked, known-limitation

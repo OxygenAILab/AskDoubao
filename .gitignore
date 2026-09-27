@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+build/
+dist/
+
+# NOTE: plugins/doubao-media/src and .../docs are intentionally committed.
+# Codex copies a plugin directory into its own cache at install time, so the
+# plugin must be self-contained.  They are regenerated from src/doubao_media by
+# scripts/build_plugin.py, and CI gates on `--check` to keep them in sync.
+plugins/doubao-media/**/__pycache__/
+
+# Session material - never commit credentials
+*.doubao_session.json
+.doubao-media/
+session.json
+.env
+
+# Local scratch / browser profiles used during protocol work
+work/_scratch/
+scratch/
+
+# OS noise
+Thumbs.db
+Desktop.ini
+.DS_Store

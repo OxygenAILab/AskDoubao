@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "doubao_media": {
+      "command": "python",
+      "args": [
+        "-X",
+        "utf8",
+        "./scripts/run_mcp.py"
+      ],
+      "cwd": ".",
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      },
+      "startup_timeout_sec": 30,
+      "tool_timeout_sec": 900
+    }
+  }
+}

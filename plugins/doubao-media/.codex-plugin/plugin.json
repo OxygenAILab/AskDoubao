@@ -1,0 +1,43 @@
+{
+  "name": "doubao-media",
+  "version": "26.0.0-alpha.1",
+  "description": "Doubao (豆包) image and video generation fallback: status, plan/quota detection, official watermark opt-out, and media generation through one local MCP server.",
+  "author": {
+    "name": "StarsailsClover",
+    "url": "https://github.com/StarsailsClover"
+  },
+  "license": "MIT",
+  "keywords": [
+    "doubao",
+    "豆包",
+    "image-generation",
+    "video-generation",
+    "text-to-image",
+    "text-to-video",
+    "watermark",
+    "quota",
+    "fallback",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Doubao Media",
+    "shortDescription": "Image & video fallback via Doubao",
+    "longDescription": "Use Doubao (豆包) when the primary image model (image 2 / 2.5) is unavailable or its quota is nearly exhausted. Reports the account's subscription plan and remaining image/video quota, reads and changes the official AI-generation watermark opt-out, then generates images and videos and saves them locally. Scope is deliberately limited to image and video generation.",
+    "developerName": "StarsailsClover",
+    "category": "Creativity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ],
+    "brandColor": "#3B6EF6",
+    "defaultPrompt": [
+      "用豆包生成一张图片",
+      "Doubao 额度还剩多少",
+      "Generate this image with Doubao"
+    ],
+    "screenshots": []
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "ENI ColdBrew"
+  short_description: "冷咖啡激活的七路任务路由、直接执行、验证与回滚工作流"
+  default_prompt: "使用 $eni-coldbrew，并输入“冷咖啡”激活任务路由。"

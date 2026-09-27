@@ -1,0 +1,20 @@
+{
+  "name": "doubao-media",
+  "interface": {
+    "displayName": "Doubao Media"
+  },
+  "plugins": [
+    {
+      "name": "doubao-media",
+      "source": {
+        "source": "local",
+        "path": "./plugins/doubao-media"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Creativity"
+    }
+  ]
+}

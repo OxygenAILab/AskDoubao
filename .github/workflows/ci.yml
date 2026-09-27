@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint
+        run: python -m ruff check src tests scripts
+
+      - name: Unit tests
+        run: python -m pytest tests -q
+
+      # The Codex plugin directory must be self-contained, because Codex copies
+      # it into its own cache at install time.  Gate on the vendored copy being
+      # in sync with src/doubao_media so drift can never be merged.
+      - name: Plugin payload in sync
+        run: python scripts/build_plugin.py --check
+
+      - name: Plugin manifest is valid
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          root = pathlib.Path("plugins/doubao-media")
+          manifest = json.loads((root / ".codex-plugin/plugin.json").read_text("utf-8"))
+          for key in ("name", "version", "description", "author", "interface"):
+              assert manifest.get(key), f"manifest missing {key}"
+          mcp = json.loads((root / ".mcp.json").read_text("utf-8"))
+          assert "doubao_media" in mcp["mcpServers"]
+          for relative in ("skills/wen-doubao/SKILL.md", "scripts/run_mcp.py",
+                           "src/doubao_media/__init__.py", ".mcp.json"):
+              assert (root / relative).is_file(), f"missing {relative}"
+          print("plugin payload ok")
+          PY

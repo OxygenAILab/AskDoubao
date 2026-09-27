@@ -1,0 +1,73 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "doubao-media"
+dynamic = ["version"]
+description = "Doubao (豆包) image and video generation bridge with official watermark and plan/quota awareness"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "StarsailsClover", email = "140955561+StarsailsClover@users.noreply.github.com" },
+]
+keywords = [
+    "doubao", "豆包", "image-generation", "video-generation",
+    "watermark", "quota", "mcp",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Graphics",
+]
+dependencies = [
+    "httpx>=0.27",
+    "mcp>=1.0",
+]
+
+[project.optional-dependencies]
+# Browser-backed transport: clears part of the risk-control surface that a
+# bare HTTP client trips.  Not required for status / watermark / plan queries.
+browser = [
+    "playwright>=1.40",
+]
+# Reading Windows Chromium cookie stores (Edge/Chrome/Doubao desktop client).
+windows = [
+    "cryptography>=42.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[project.scripts]
+doubao-media = "doubao_media.cli:main"
+
+[project.urls]
+Repository = "https://github.com/AprismLab/doubao-media"
+Issues = "https://github.com/AprismLab/doubao-media/issues"
+
+[tool.hatch.version]
+path = "src/doubao_media/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/doubao_media"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

@@ -1,0 +1,7 @@
+"""MCP surface for the Doubao media bridge."""
+
+from __future__ import annotations
+
+from .server import build_server, main
+
+__all__ = ["build_server", "main"]

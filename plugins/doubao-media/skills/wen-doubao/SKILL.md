@@ -44,6 +44,11 @@ this skill does not do it.
 > one generation per user request, never a batch or a retry loop. If a block
 > appears, stop and tell the user to wait; see §6.2.
 
+> **Measured limits.** In practice **1–2** generation calls in a short window are
+> enough to trigger the block, and a call that is refused or challenged **still
+> consumes quota**. Treat every generation as expensive and irreversible: one per
+> user request, with real spacing between requests.
+
 ## 2 Preflight (always)
 
 1. Call **`doubao_status`**. Report the tier and the remaining image/video
@@ -241,6 +246,12 @@ There is no challenge to solve: the account or session is being throttled for
 calling too often. **The only correct action is to stop.** Do not call
 `doubao_verify_challenge`, do not retry, do not loop — every extra request makes
 it worse.
+
+Measured behaviour (2026-09-30): roughly **1–2** dense generation calls are
+enough to produce this block, refused calls still burn quota, and once the block
+expires the account returns to `710022004` — which dense calling will push
+straight back into `710022002`. After a successful verification, retry **once**
+and then stop.
 
 Tell the user: *"豆包当前限制了访问频率（710022002），需要等待一段时间。这不是可以立即解决的验证，请稍后再试。"* Then fall back to another
 generator, or ask how they want to proceed.

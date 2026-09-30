@@ -97,6 +97,22 @@ probing*, which is the most important operational fact in this ADR.
   challenge is therefore not cosmetic: it is the difference between "one
   verification and you can continue" and "stop now or make it worse".
 
+## Measured throttling sensitivity
+
+Live measurements (2026-09-30) tighten the operational rule considerably:
+
+| Observation | Value |
+|---|---|
+| Calls needed to trigger `710022002` from a clean state | **about 1-2** in a short window |
+| Does a challenged/refused call consume quota? | **Yes** - usage went 2% -> 3% across the probe calls |
+| Can the two forms alternate? | Yes - `710022004` returns once the block expires, and dense calling pushes it back to `710022002` |
+
+Consequences: one generation per user request, real spacing between requests, and
+after a successful verification exactly **one** retry - not a loop, or the account
+goes straight back to the unsolvable form. `_scratch/e2e_flow.py` encodes this and
+correctly refused to retry when it hit the block (exit code 3).
+
+
 ## Consequences
 
 - A user-facing browser window is required to clear a challenge. Headless

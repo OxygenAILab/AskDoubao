@@ -49,6 +49,14 @@ this skill does not do it.
 > consumes quota**. Treat every generation as expensive and irreversible: one per
 > user request, with real spacing between requests.
 
+> **This tool has already harmed a real account.** Repeated automated calls
+> escalated from a web-only block to an account/device-level one, leaving the user
+> with only mobile access while both web and desktop stopped working. For that
+> reason generation is **disabled unless `DOUBAO_MEDIA_ENABLE_GENERATION=1`**, and
+> is additionally bounded by a local cooldown and a rolling daily cap. If a tool
+> reports `riskControl.kind = "generation_disabled"`, do **not** try to work
+> around it — explain the trade-off and let the user decide.
+
 ## 2 Preflight (always)
 
 1. Call **`doubao_status`**. Report the tier and the remaining image/video
@@ -70,6 +78,10 @@ this skill does not do it.
 | `doubao_generate_video` | **yes** | generate and save a video (scarcest quota) |
 | `doubao_watermark_opt_out` | no | change the watermark switch (removal needs confirmation) |
 | `doubao_verify_challenge` | no | open Doubao's security check for the user to solve |
+
+Generation additionally requires `DOUBAO_MEDIA_ENABLE_GENERATION=1` in the MCP
+server's environment. Without it the generation tools return
+`riskControl.kind = "generation_disabled"` and spend nothing.
 
 ### Reading the status payload
 

@@ -40,6 +40,15 @@ python _scripts/bc/insert_watermark.py --check
    `710022002` (frequency block, unsolvable - see `docs/adr/0003`). Use the
    bundled-asset tooling for protocol work, and issue at most one generation per
    user request.
+
+   **This rule exists because it was broken and it caused real harm.** Repeated
+   automated calls during development escalated risk control from
+   scene-scoped (web only) to **account/device-scoped**, and the account holder
+   lost both web and desktop access, keeping only mobile. See `docs/adr/0004`.
+   Consequently generation is now **disabled by default**
+   (`DOUBAO_MEDIA_ENABLE_GENERATION=1` to opt in) and bounded by
+   `DOUBAO_MEDIA_MIN_INTERVAL` plus `DOUBAO_MEDIA_DAILY_CAP`. Do not weaken these
+   guards to make a test pass.
 2. **Never automate the security challenge.** `710022004` carries a verification
    blob that only the account holder may solve, in a visible window. No
    slider-solving, no blob re-signing.

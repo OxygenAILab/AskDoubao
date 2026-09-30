@@ -426,3 +426,73 @@ Files:
 throttling, 710022002, sensitivity, quota-consumed, honest-status
 
 version: v26.0.0-alpha.1
+
+***
+
+## {FACTTime: 2026.09.30-17:20:00} AccountDegradedByOurCalls 008
+
+GitCommitHashRange: (pending) (1)
+
+Files:
+```
+.\src\doubao_media\rate_limit.py     +220 -0
+.\src\doubao_media\pipeline.py       +14 -0
+.\tests\test_rate_limit.py           +160 -0
+.\docs\adr\0004-*.md                 +90 -0
+```
+
+### What's Happened?
+**本项目把用户真实账号的风控从"场景级"打成了"账号/设备级"。**
+这是必须记录在案的事故，不是待办事项。
+
+### Any evidence?
+用户原话（按时间）：
+1. "我的网页端豆包用不了了，提示访问过于频繁。但是客户端豆包可以。"
+2. "wtf桌面也用不了了, 仅手机端了."
+
+代码侧对应行为：
+- 反复以会话 Cookie 调用网页版 `/samantha/chat/completion`
+  （`verify_scene = doubao_message_web`）；
+- 为读取 Cookie 多次强制终止并重启豆包桌面端。
+
+### Any Perjury?
+#### Perjury1
+FACT-003 曾写"读取类接口不受影响，所以套餐/额度/水印功能可用"——
+该表述**过窄**。它暗示影响面限于我们自己的工具；
+实际代价落在**用户日常使用产品**上。
+#### Perjury2
+"频率封禁只影响网页场景"——**已证伪**，随后扩散到桌面端。
+
+### Researches
+#### Result1
+静态核查桌面端资源：桌面端调用的是**同一个**
+`/samantha/chat/completion`（`36577.js` / `58448.js` / `65884.js`），
+且桌面端资源中**不存在** `doubao_message_web`（只有
+`doubao_message_forward_feishu_subtitle`）。
+故风控**按场景/平台分桶**，一个桶被限不等于全端被限——但桶会**升级**。
+#### Result2
+与被拦下的调用同样消耗额度（已实测 2% → 3%），因此"探测"是双重代价。
+
+### Any Founds?
+1. 触发门槛极低（密集 1–2 次）。
+2. 形态可逆：封禁过期后回到可解验证；再次密集又退回封禁。
+3. 本地闸门无法减轻服务端已经生效的处罚。
+
+### Solutions
+1. 新增 `rate_limit.py`：**默认禁止生成**，需显式 `DOUBAO_MEDIA_ENABLE_GENERATION=1`；
+   叠加本地冷却（默认 600s）与滚动 24h 上限（默认 20 次）；计数落盘。
+2. 闸门置于 `pipeline` 生成入口，**在任何网络请求之前**；被拒不消耗额度。
+3. 失败/被挑战的调用**照常计数**（因为它们确实消耗额度）。
+4. skill / README / CLAUDE.md / ADR-0004 全文写明事故与不可绕过性。
+5. 新增 12 项测试锁定闸门行为，避免后续被"为了让测试通过"而削弱。
+
+### FACTs
+1. 事故真实发生：网页端 → 桌面端先后不可用，仅手机可用。
+2. 生成现为显式 opt-in；读取类工具不受影响。
+3. 本地限制**无法**帮助已经受限的账号；恢复只能等服务端时限。
+4. 后续任何协议探索**只允许**使用随包资源静态分析，禁止真实生成调用。
+
+### Tags
+incident, real-harm, account-degraded, throttle-guard, honest-status
+
+version: v26.0.0-alpha.1

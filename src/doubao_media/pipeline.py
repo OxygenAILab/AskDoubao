@@ -20,6 +20,9 @@ from .models import (
     WatermarkState,
 )
 from .quota import PlanStatus
+from .rate_limit import guard as _guard_generation
+from .rate_limit import record as _record_generation
+from .rate_limit import status as _throttle_status
 from .transport import DoubaoTransport
 
 _IMAGE_EXTENSIONS = {
@@ -167,6 +170,7 @@ class MediaPipeline:
         timeout: float | None = None,
     ) -> GenerationOutcome:
         """Generate one or more images, optionally watermark-free and downloaded."""
+        _guard_generation()
         request = watermark or WatermarkRequest()
         outcome = GenerationOutcome(kind="image", prompt=prompt)
         ref_key = reference_image
@@ -174,6 +178,7 @@ class MediaPipeline:
             ref_key = await self.client.upload_reference_image(bytes(reference_image))
 
         # G  i   tH u  b   @O xyge nAI   La  b | O xyg  e   nA   ILa   b @S tarsail   sCl  o  ve r
+        _record_generation()
         previous = await self._apply_watermark_policy(request, outcome)
         try:
             for _ in range(max(1, int(count))):
@@ -207,12 +212,14 @@ class MediaPipeline:
         timeout: float | None = None,
     ) -> GenerationOutcome:
         """Generate a video, optionally watermark-free and downloaded."""
+        _guard_generation()
         request = watermark or WatermarkRequest()
         outcome = GenerationOutcome(kind="video", prompt=prompt)
         ref_key = reference_image
         if isinstance(reference_image, (bytes, bytearray)):
             ref_key = await self.client.upload_reference_image(bytes(reference_image))
 
+        _record_generation()
         previous = await self._apply_watermark_policy(request, outcome)
         try:
             kwargs: dict[str, Any] = {
@@ -305,6 +312,11 @@ class MediaPipeline:
         return await self.client.get_plan_status(
             near_limit_threshold=near_limit_threshold
         )
+
+    @staticmethod
+    def throttle_status() -> dict[str, Any]:
+        """Local generation throttle state (cooldown, daily budget)."""
+        return _throttle_status()
 
 
 async def run(coro: Any) -> Any:

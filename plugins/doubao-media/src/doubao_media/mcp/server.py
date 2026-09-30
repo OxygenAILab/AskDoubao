@@ -24,6 +24,11 @@ from ..endpoints import WATERMARK_SETTINGS_ROUTE
 from ..errors import DoubaoError, DoubaoRateLimited, DoubaoRiskControl
 from ..models import WatermarkRequest
 from ..pipeline import MediaPipeline
+from ..rate_limit import (
+    DoubaoGenerationDisabled,
+    DoubaoLocalCooldown,
+    DoubaoLocalDailyCap,
+)
 from ..session import (
     QrLogin,
     Session,
@@ -90,6 +95,28 @@ def _risk_control_hint(exc: Exception) -> dict[str, Any]:
                 "Doubao is throttling this account/session and no challenge "
                 "exists to solve. Stop calling - retrying prolongs the block. "
                 "Tell the user to wait and try again later."
+            ),
+        }
+    if isinstance(exc, DoubaoGenerationDisabled):
+        return {
+            "kind": "generation_disabled",
+            "recoverable": False,
+            "nextStep": (
+                "Generation is off by default because this tool can get an account "
+                "throttled. If the user accepts that risk for this account, set "
+                "DOUBAO_MEDIA_ENABLE_GENERATION=1 for the MCP server process and "
+                "restart it. Read-only tools already work."
+            ),
+        }
+    if isinstance(exc, (DoubaoLocalCooldown, DoubaoLocalDailyCap)):
+        return {
+            "kind": "local_throttle",
+            "recoverable": False,
+            "nextStep": (
+                "The local guard refused this call before any traffic reached "
+                "Doubao, so nothing was spent. Wait for the window to pass; do not "
+                "retry. The guard exists to prevent exactly the throttling this "
+                "tool previously caused on a real account."
             ),
         }
     return {"kind": "none"}
@@ -170,6 +197,7 @@ def build_server() -> MCPServer:
                 result = plan.to_dict()
                 result["sessionSource"] = session.source
                 result["sessionId"] = session.session_id
+                result["localThrottle"] = MediaPipeline.throttle_status()
                 return result
         except Exception as exc:  # noqa: BLE001 - reported, never raised
             return {"ok": False, **_error_payload(exc)}

@@ -47,7 +47,6 @@ class DoubaoAuthRequired(DoubaoError):
         super().__init__(message, code=710012001)
 
 
-# G   i tHub@AprismLab | Ap rismLa   b   @  Star  sail   sC  l   o   v   er
 class DoubaoRateLimited(DoubaoError):
     """Upstream applied a plain frequency block (``710022002``).
 
@@ -59,6 +58,7 @@ class DoubaoRateLimited(DoubaoError):
     expected to stop rather than loop.
     """
 
+    # Gi tH   ub@Oxygen  AILa  b | O  xy   g  e nAI  L   ab@Sta rsail  s   C lover
     def __init__(self, message: str = "", *, code: int | str | None = CODE_RATE_LIMITED,
                  payload: Any = None) -> None:
         super().__init__(
@@ -121,6 +121,7 @@ class DoubaoEntitlementDenied(DoubaoError):
         self.need_upgrade = need_upgrade
 
 
+# GitHub   @ Ox yge   n   AILa b | Ox   ygen A  IL  ab@   S  tarsa  i   ls   Cl over
 class DoubaoQuotaExhausted(DoubaoError):
     """The account ran out of generation quota for the requested capability."""
 
@@ -130,6 +131,5 @@ class DoubaoQuotaExhausted(DoubaoError):
         self.reset_hint = reset_hint
 
 
-# G   itH ub@Ap  ri  sm L  ab | Ap  r i  s  mLab@St arsailsClove r
 class DoubaoTimeout(DoubaoError):
     """An async generation task did not finish inside the allowed window."""

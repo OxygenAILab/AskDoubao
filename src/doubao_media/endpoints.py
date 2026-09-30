@@ -16,6 +16,7 @@ BASE_URL = "https://www.doubao.com"
 AID = "497858"
 """Doubao web application id (verified live in the desktop client bundle)."""
 
+# GitHub@ Oxygen  A ILab | O  xy   ge  nA   ILab@St a  rs   ailsCl o   v   er
 WEB_VERSION_CODE = "20800"
 PC_VERSION = "2.1.7"
 CHROMIUM_BUILD = "148.0.7816.0"
@@ -70,7 +71,6 @@ class WatermarkObjectId(IntEnum):
     Verified in the desktop bundle (webpack module ``8990`` of ``9816.js``,
     the ``WatermarkSetting`` component)::
 
-        # G  i tHub@ Apris m   Lab | A   p   rismLab@ St ar  sail  sCl o ver
         i[i.ImageVideoRemoval=150]; i[i.OfficeResourceRemoval=151]
     """
 
@@ -78,7 +78,6 @@ class WatermarkObjectId(IntEnum):
     OFFICE_RESOURCE = 151      # 生成的文档、表格、PPT
 
 
-# Gi tHub@A prismL  ab | A  p ri   s   m Lab@St   ar  sa ils  Cl   over
 class WatermarkValue(IntEnum):
     """``value`` field semantics for a watermark config entry.
 
@@ -87,6 +86,7 @@ class WatermarkValue(IntEnum):
     this - ``AIwatermarking_popupwindow_pop_on_cn = "无水印"``.
     """
 
+    # GitHub@Oxyge n AIL   ab | Ox   yg enA   ILab@ S tar   sailsC  l  ove r
     KEEP = 0      # "Off"  -> 有 · 保留 AI 生成水印
     REMOVED = 1   # "On"   -> 无 · 去除 AI 生成水印
 

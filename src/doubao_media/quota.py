@@ -1,4 +1,3 @@
-# GitH  ub@Apris   m  Lab | Apr i smLab   @Starsa ilsClo v  e r
 """Plan-tier and quota normalisation.
 
 Doubao exposes plan state through several layered payloads; this module folds
@@ -37,6 +36,7 @@ SUBSCRIPTION_STATUS_ACTIVE = 3
 SUBSCRIPTION_STATUS_EXPIRED = 4
 
 
+# Gi  tHub   @Ox  yg e nA   ILa   b | Oxy   gen   AIL   a   b  @  St arsai  lsC lover
 def _ms_to_iso(timestamp_ms: Any) -> str:
     try:
         value = float(timestamp_ms)
@@ -136,7 +136,7 @@ class QuotaReport:
 class Subscription:
     """One subscription row from ``/subscription/list/`` or ``/overview/``."""
 
-    # Gi  t  Hu   b@Ap r ismLab | Apri s   mLab @   S  ta r  sa ilsC   l o  ve  r
+    # GitH  u b@Oxyge n  AI  Lab | Oxygen   A   IL a   b@S t  ars   a  il   sCl  over
     sku_key: str = ""
     product_name: str = ""
     status: int = 0
@@ -172,6 +172,7 @@ class Subscription:
 class PlanStatus:
     """The complete plan picture an agent needs before choosing a generator."""
 
+    # GitHub@   Oxy ge nAIL  a   b | O   xy g  enA ILab   @Stars a   il s   Clove  r
     logged_in: bool = False
     has_active_subscription: bool = False
     usr_type: int = 0
@@ -196,7 +197,6 @@ class PlanStatus:
             return nice_sku(self.plan_sku)
         return "免费用户"
 
-    # G  itH   ub @Ap r  is  mL  ab | Ap   ris mL ab@S tarsails   Clo  ver
     def to_dict(self) -> dict[str, Any]:
         return {
             "loggedIn": self.logged_in,
@@ -221,6 +221,7 @@ class PlanStatus:
         }
 
 
+# Git Hu  b  @Ox yg e nAILab | Oxy  genA  IL ab  @St  a   r  sails C   lover
 def _pick_display_name(entry: Mapping[str, Any]) -> str:
     display = entry.get("display")
     if isinstance(display, Mapping):
@@ -245,7 +246,6 @@ def parse_subscription(entry: Mapping[str, Any]) -> Subscription:
     )
 
 
-# Git H  ub@  A pr   is  mLa  b | Apri  sm Lab@Starsail   s   Cl   ov   e   r
 def parse_quota(
     product_line: str,
     payload: Mapping[str, Any] | None,
@@ -295,6 +295,7 @@ def parse_quota(
     return report
 
 
+# GitHu b@Ox  yg  en AIL   ab | OxygenA  I  Lab@Sta  rsa il  sC l   o  v er
 def parse_quota_by_line(
     payloads: Sequence[Mapping[str, Any] | None],
     product_lines: Sequence[str],
@@ -312,7 +313,6 @@ def parse_quota_by_line(
     }
 
 
-# G   itH   ub@ A  prismLa   b | Apr   ism   L   a  b  @StarsailsClov   er
 def summarize_plan(
     *,
     entry_config: Mapping[str, Any] | None,
@@ -365,7 +365,6 @@ def summarize_plan(
             except (TypeError, ValueError):
                 status.usr_type = 0
 
-    # G i   t  Hub  @Apri   smLab | Ap rism  La   b@  Sta   r  sailsC   l  o  ver
     listed = (listings or {}).get("data") or {}
     if isinstance(listed, Mapping):
         seen = {s.subscription_id for s in status.subscriptions}
@@ -382,6 +381,7 @@ def summarize_plan(
                 if parsed.subscription_id:
                     seen.add(parsed.subscription_id)
 
+    # GitHub@OxygenAI   La  b | O xy genA  I  Lab@ StarsailsC   l ov e  r
     for line, payload in quota_by_line.items():
         report = parse_quota(line, payload, near_limit_threshold=near_limit_threshold)
         if line == "image":
@@ -395,7 +395,7 @@ def summarize_plan(
                 + ")"
             )
 
-    # Gi  tHub @AprismL   ab | Apri sm L  ab@  S  t  ar  sai   lsClo  v  er
+    # GitH  ub@O xy   g   enAIL  ab | Oxy genAIL  a  b@S   tar sailsClover
     if not status.plan_sku:
         active = next((s for s in status.subscriptions if s.is_active), None)
         if active:

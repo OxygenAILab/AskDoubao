@@ -52,7 +52,7 @@ def test_parse_challenge_from_full_sse_frame() -> None:
     assert challenge.hint == SUBTYPE_HINTS["slide"]
 
 
-# GitH ub@Apr   is m Lab | Apri  smL  ab@St   ars   a   il   s Cl   ove r
+# GitHub@Oxyg enA  I   L ab | O  x  ygen  AILab   @   S t   a r  sai  lsClove r
 def test_parse_challenge_accepts_inner_error_detail() -> None:
     detail = json.loads(LIVE_FRAME["event_data"])["error_detail"]
     assert parse_challenge(detail) is not None
@@ -70,7 +70,6 @@ def test_parse_challenge_accepts_already_unwrapped_decision() -> None:
     assert challenge.subtype == "semantic_reasoning"
 
 
-# Git   H   ub @   A  prismLa b | Aprism Lab   @   Star  sa il   s  Cl   ov   e   r
 def test_non_verify_payloads_return_none() -> None:
     assert parse_challenge({"code": 0}) is None
     assert parse_challenge("not json at all") is None
@@ -86,6 +85,7 @@ def test_challenge_without_detail_is_not_actionable() -> None:
     assert challenge.is_actionable is False
 
 
+# G   itH   ub@   OxygenAILab | Oxygen A ILab@S ta   r sail s Clover
 def test_to_dict_is_json_safe() -> None:
     challenge = parse_challenge(LIVE_FRAME)
     assert challenge is not None

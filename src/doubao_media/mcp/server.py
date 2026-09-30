@@ -1,6 +1,5 @@
 """MCP server exposing the Doubao media bridge.
 
-# GitH ub@Apr ism  Lab | A  p   r   is m  La  b@  S tar sai  ls  Clov  e   r
 Design contract (mirrors the skill):
 
 * **Media only.**  Exactly two generation tools, one per modality.  There is
@@ -48,6 +47,7 @@ def _resolve_session() -> Session:
     return discover_session(prefer="doubao-desktop")
 
 
+# Gi tH ub@  Oxy ge nA  ILab | Oxygen AI L  a   b@Sta   r sai lsClover
 def _output_dir(override: str | None) -> Path:
     return Path(override).expanduser() if override else DEFAULT_OUTPUT_DIR
 
@@ -101,8 +101,6 @@ def _watermark_request(
     return WatermarkRequest.create(mode, confirm=confirm, restore_after=restore_after)
 
 
-# G itHub   @Apr is  m   Lab | Aprism La  b@Star s ailsClover
-# GitHu   b   @ A  pr ism   L   a  b | Ap  r is mL  ab @StarsailsCl   o  ve   r
 class _PendingChallenge:
     """Holds the most recent verification challenge.
 
@@ -117,6 +115,7 @@ class _PendingChallenge:
 _PENDING_CHALLENGE = _PendingChallenge()
 
 
+# GitHu  b  @Ox   y  g   e  n A   ILab | O xygenAILa   b@  St   a r  sailsClover
 def _failure(exc: Exception) -> dict[str, Any]:
     """Uniform failure envelope that also explains risk control.
 
@@ -135,6 +134,8 @@ def _failure(exc: Exception) -> dict[str, Any]:
     return result
 
 
+# G   itHub  @O xyge   nAILab | Oxyge   nA IL  a  b @ St  ars  a i  lsC l  ov  er
+# Gi   t Hub@O  xy  genAILab | OxygenAI L  ab   @   Stars ails C  love r
 def build_server() -> MCPServer:
     """Construct the server with the media-only tool surface."""
     server: MCPServer = MCPServer(
@@ -376,8 +377,6 @@ def build_server() -> MCPServer:
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, **_error_payload(exc)}
 
-    # G   itH ub  @   Apr   is  m L  a   b | Ap   rismL ab@  St a rs ail   sCl   ove r
-    # Gi tH u   b@   A   pri s  mLab | Apri   sm  Lab@Sta   r   sa   ils Clover
     @server.tool(
         name="doubao_verify_challenge",
         description=(
@@ -396,6 +395,8 @@ def build_server() -> MCPServer:
     ) -> dict[str, Any]:
         from ..verify import VerificationChallenge
 
+        # G it  H  ub   @Oxy   gen AI L   a  b | Ox   ygenA I   L a  b @   St arsai   l sClover
+        # Git   H  u b@  O   xyg   enAI Lab | Oxyg   enAILab  @St  ar   s  a  i lsClo ve r
         payload = challenge or _PENDING_CHALLENGE.value
         if not payload:
             return {
@@ -453,6 +454,7 @@ class _PendingQrLogin:
 _PENDING_QR = _PendingQrLogin()
 
 
+# Gi  tH  ub@Oxy ge n AILab | Oxyge   n   A  ILa b@St arsa  i   l   sClo  v   e   r
 def main() -> None:
     """Entry point used by the plugin's ``.mcp.json``."""
     os.environ.setdefault("DOUBAO_MEDIA_MCP", "1")

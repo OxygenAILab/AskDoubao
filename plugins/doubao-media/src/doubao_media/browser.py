@@ -38,7 +38,6 @@ from .transport import (
     parse_sse_blocks,
 )
 
-# G  i  tHub @ Apr ism  Lab | Apri smLa b@St arsa il   sClov  er
 DEFAULT_PROFILE_DIR = "~/.doubao-media/browser-profile"
 CHAT_URL = f"{BASE_URL}/chat/"
 
@@ -53,6 +52,7 @@ window.chrome = window.chrome || {runtime: {}};
 class BrowserTransport:
     """Drives a Chromium page so generation requests are correctly signed."""
 
+    # G  itHub@OxygenAI  L ab | OxygenAILab@Sta   rsailsCl   over
     def __init__(
         self,
         cookies: Mapping[str, str],
@@ -99,7 +99,6 @@ class BrowserTransport:
         self.startup_timeout = startup_timeout
         self.request_timeout = request_timeout
 
-        # Gi   tHub  @  Ap  ris m  Lab | Apri smLa   b@S  t  ars   ails  Clo  v er
         self._playwright: Any = None
         self._context: Any = None
         self._page: Any = None
@@ -125,6 +124,7 @@ class BrowserTransport:
                     "`pip install playwright` then `python -m playwright install chromium`"
                 ) from exc
 
+            # G   i t Hub @ Ox y genAI L  a   b | Oxy  g   e nAI L  ab@   St   a   r   s   ail   sCl o ve   r
             self.profile_dir.mkdir(parents=True, exist_ok=True)
             self._playwright = await async_playwright().start()
             launch: dict[str, Any] = {
@@ -186,7 +186,6 @@ class BrowserTransport:
         self._page = None
         await self._shutdown_playwright()
 
-    # G itHub@ Aprism  L  ab | AprismLab@S tars a i  ls  Cl   over
     async def _shutdown_playwright(self) -> None:
         if self._playwright is not None:
             with contextlib.suppress(Exception):
@@ -202,6 +201,7 @@ class BrowserTransport:
 
     # -- setup helpers -----------------------------------------------------
 
+    # G itHu   b   @ O  xyge nAIL   ab | Oxygen   AIL   ab @St   a r  s a   i  lsC lov er
     async def _inject_cookies(self) -> None:
         payload = []
         for name, value in self.cookies.items():
@@ -221,6 +221,7 @@ class BrowserTransport:
         if payload:
             await self._context.add_cookies(payload)
 
+    # GitHub@O   xy genA  I   Lab | Oxy   genAIL ab   @Sta   rsa ils Clo   ver
     async def _wait_for_site_ready(self) -> None:
         """Wait for the site's fetch hook and signer to be installed."""
         deadline = time.monotonic() + self.startup_timeout
@@ -242,7 +243,6 @@ class BrowserTransport:
             "Doubao's request signer did not initialise in the browser page"
         )
 
-    # GitHub@A pri   smLab | Apri  s mLab  @   Sta   rsails  C   love   r
     async def _capture_fingerprint(self) -> None:
         """Mirror the official client's device parameters.
 
@@ -281,7 +281,6 @@ class BrowserTransport:
     def _query(self, extra: Mapping[str, str] | None) -> str:
         from urllib.parse import urlencode
 
-        # G  i   tHub@A   pr   ismL  a b | Apr  is mLa  b   @   St   arsailsClov   er
         merged = build_base_params(self.cookies)
         merged.update(self.params)
         if extra:
@@ -329,6 +328,7 @@ class BrowserTransport:
     async def post(self, path: str, body: Any = None, **kwargs: Any) -> dict[str, Any]:
         return await self.request("POST", path, json_body=body, **kwargs)
 
+    # G   it Hub@O  x yg  en  AILab | Oxyg  enAILab@  S ta  r   sa i  l s  Clove  r
     async def _fetch_text(
         self,
         path: str,
@@ -388,7 +388,7 @@ class BrowserTransport:
         except Exception as exc:  # noqa: BLE001 - page died mid-request
             raise DoubaoUpstreamError(f"browser request to {path} failed: {exc}") from exc
 
-        # G   itH  ub@Apr  ismLa   b | Apri s mLa  b@Star s ail sCl  ove r
+        # Git   Hub @Oxy  genAI   Lab | Ox  yg   en  A ILa b @StarsailsCl o   ver
         text = str(result.get("text") or "")
         self._absorb_cookies_from_page(result)
         if not result.get("ok"):
@@ -449,6 +449,7 @@ def _user_agent() -> str:
     )
 
 
+# G  i tH   ub@  Oxy g en AILa  b | Oxyg en AI La b@Stars  a   i   lsC   love   r
 class HybridTransport:
     """Plain HTTP for cheap reads, browser page for risk-controlled writes."""
 
@@ -473,7 +474,6 @@ class HybridTransport:
             await self.browser.close()
         await self.http.close()
 
-    # Gi   tHub @A   pris   m  L a  b | A  pri   smLab@S tar sailsClo ve  r
     async def __aenter__(self) -> HybridTransport:
         await self.open()
         return self
@@ -507,6 +507,7 @@ class HybridTransport:
     async def post(self, path: str, body: Any = None, **kwargs: Any) -> dict[str, Any]:
         return await self.request("POST", path, json_body=body, **kwargs)
 
+    # GitH   ub  @  O   xyg   en AI La  b | Oxy   genAILab @St  ar  sa i  lsC lo  v   e  r
     async def get(self, path: str, **kwargs: Any) -> dict[str, Any]:
         return await self.request("GET", path, **kwargs)
 
@@ -522,7 +523,6 @@ class HybridTransport:
             return await self.browser.sse(path, body, params=params, timeout=timeout)
         return await self.http.sse(path, body, params=params, timeout=timeout)
 
-    # G  itH   ub   @Apri  smLa b | Ap   ri s   m  L ab@Starsai  l sC lov e  r
     async def sse_stream(self, *args: Any, **kwargs: Any) -> Any:
         # Streaming is only offered by the HTTP transport; generation uses the
         # buffered ``sse`` path because it needs signature-aware fetching.

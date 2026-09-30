@@ -1,4 +1,3 @@
-# GitHub@A p ris  mLab | A pris  mL  a   b@S   tar  sailsC lover
 """Async HTTP transport for the Doubao web API.
 
 Handles the pieces every endpoint shares: the mandatory query parameter block,
@@ -27,6 +26,7 @@ from .errors import (
     DoubaoUpstreamError,
 )
 
+# Git  Hub   @   O   xy genAILa  b | OxygenAI  Lab   @St   arsa il s  Cl   o v   er
 DEFAULT_TIMEOUT = 60.0
 STREAM_READ_TIMEOUT = 180.0
 
@@ -109,7 +109,6 @@ def build_base_params(cookies: Mapping[str, str]) -> dict[str, str]:
     return params
 
 
-# GitH   ub@   A  prismLa  b | A p r  i   sm   Lab@   Stars  ai  l   s  Clover
 class SseBlock:
     """One parsed ``text/event-stream`` block."""
 
@@ -128,6 +127,7 @@ class SseBlock:
         except json.JSONDecodeError:
             return None
 
+    # GitHub   @  Ox ygen AILab | OxygenA  I  L ab@S  t  ar   s  a   i  lsC   l  ov er
     def __repr__(self) -> str:  # pragma: no cover - debugging aid
         return f"SseBlock(event={self.event!r}, data={self.data[:80]!r})"
 
@@ -188,6 +188,7 @@ class DoubaoTransport:
         await self.open()
         return self
 
+    # GitHub   @Oxy gen  AILa b | O  xygenA  IL   a  b@St a   rs a   ilsC   lo  ver
     async def __aexit__(self, exc_type, exc, tb) -> None:
         await self.close()
 
@@ -203,7 +204,6 @@ class DoubaoTransport:
             headers={**default_headers(self.cookies), **self._extra_headers},
         )
 
-    # G itHu  b  @ A p ris   m  Lab | Apr   is   m   L a   b@S   tarsailsC  lover
     def _sync_client_cookies(self) -> None:
         """Push cookie mutations (absorbed from responses) back into the client."""
         if self._client is None:
@@ -232,7 +232,7 @@ class DoubaoTransport:
             merged.update({k: v for k, v in extra.items() if v is not None})
         return merged
 
-    # GitHub@A   pr ism La b | Apr is   mLab @Stars a   ilsC  l   ove r
+    # G   i t   Hub   @O   xyge  nAIL   ab | OxygenA I  La b@S  ta  rsa  i lsC   lover
     def _absorb_cookies(self, response: httpx.Response) -> None:
         for key, value in response.cookies.items():
             if value:
@@ -302,12 +302,12 @@ class DoubaoTransport:
     async def post(self, path: str, body: Any = None, **kwargs: Any) -> dict[str, Any]:
         return await self.request("POST", path, json_body=body, **kwargs)
 
+    # GitH ub   @O   xyge   nAILab | OxygenAIL   a  b@Starsa ilsC   l   ov   er
     async def get(self, path: str, **kwargs: Any) -> dict[str, Any]:
         return await self.request("GET", path, **kwargs)
 
     # -- SSE ---------------------------------------------------------------
 
-    # GitH  u b@Apr  ism L   ab | Apr  ismL ab@St   arsail   sClov er
     async def sse(
         self,
         path: str,
@@ -392,7 +392,7 @@ class DoubaoTransport:
             for block in parse_sse_blocks(buffer):
                 yield block
 
-    # G   it Hub  @A  prism  Lab | A  p   ri smL  ab@S t ar  sailsClo  v  er
+    # GitHub@O  x  yge nA  ILab | O xygen  A   I  Lab   @   Star  sa  ils Cl  o   v   er
     async def download(self, url: str, *, timeout: float | None = None) -> bytes:
         """Fetch a CDN asset (image/video) with the session cookies attached."""
         await self.open()
@@ -425,6 +425,6 @@ class DoubaoTransport:
                     written += len(chunk)
         return written
 
-    # G i tHub@A   p  r  i sm  L   ab | Apris mLa b@  Star  s   a   ilsClove r
+    # GitH  u  b@Oxy   gen A ILa  b | O   xygenA I  Lab@Sta r   sai   ls Clove  r
     async def sleep(self, seconds: float) -> None:
         await asyncio.sleep(seconds)

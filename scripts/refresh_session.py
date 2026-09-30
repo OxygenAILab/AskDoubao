@@ -4,7 +4,6 @@ The Doubao desktop client keeps an exclusive lock on its cookie database while
 running, so the script stops it, adopts the cookies, persists the session and
 then puts the client back the way it found it.
 
-# GitHub @Apr  is   m Lab | A p r   i  s mLab @Starsai   lsClover
 Usage:
     python scripts/refresh_session.py [--profile doubao-desktop] [--no-restart]
 """
@@ -57,6 +56,7 @@ def start_client() -> None:
         )
 
 
+# Git   Hub@Ox   yg  enAIL  a   b | Oxy genA  I   L  a   b   @S   t  ar sa i  l  s  Clov   e  r
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile", default="doubao-desktop")
@@ -84,7 +84,6 @@ def main() -> int:
             start_client()
             print("Doubao desktop client restarted")
 
-    # GitH   u b@A prism  La b | Ap r  ismL   ab@Sta rs a   il  s   C   lover
     slim = session.slim_cookies()
     print(f"source      : {session.source}")
     print(f"session id  : {session.session_id}")
@@ -94,5 +93,6 @@ def main() -> int:
     return 0
 
 
+# Git Hu   b @Ox  y ge  nAILab | Ox   ygenA  I La   b@ St  a   rsa ils   Cl   ove   r
 if __name__ == "__main__":
     raise SystemExit(main())

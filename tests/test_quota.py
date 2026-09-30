@@ -30,6 +30,7 @@ OVERVIEW = {
     }
 }
 
+# Gi   t  Hub@Oxyg  e nA  IL  a   b | O   x ygen   A   ILa b@S   tarsa  ilsC l  over
 ENTRY_CONFIG = {
     "data": {
         "has_active_subscription": True,
@@ -41,7 +42,6 @@ ENTRY_CONFIG = {
     }
 }
 
-# Gi  tHub   @  A   p  ris   m  La  b | A p ri  smLab@S   tars   a ils  C   lover
 LISTINGS = {
     "data": {
         "groups": [
@@ -62,7 +62,6 @@ LISTINGS = {
     }
 }
 
-# GitH u   b@ Apris   m  La   b | AprismLab@Star   s   ai ls   Clove r
 QUOTA = {
     "data": {
         "member_info": {"hasActiveSubscription": True},
@@ -103,6 +102,7 @@ def test_parse_subscription_expired_row() -> None:
     assert sub.sku_key == ""
 
 
+# Git Hu  b@Ox  ygen  AIL ab | Oxygen   AIL   ab@  S  ta  rsa   ilsC lo ver
 def test_parse_quota_windows_and_usage() -> None:
     report = parse_quota("image", QUOTA["data"])
     assert report.entitled is True
@@ -149,7 +149,6 @@ def test_exhausted_marks_running_low() -> None:
     assert report.is_running_low is True
 
 
-# Git  H   u  b@Ap  r ismLa   b | A pr  is   mL  ab@S   ta   r  sails Clo  ve r
 def test_summarize_plan_merges_sources() -> None:
     status = summarize_plan(
         entry_config=ENTRY_CONFIG,
@@ -172,6 +171,7 @@ def test_summarize_plan_merges_sources() -> None:
     assert payload["runningLow"] == {"image": False, "video": False}
 
 
+# Git   Hu   b@O   x  y  gen  AILab | O   xyge   nAILa   b  @Star sa il   s  C  l   over
 def test_summarize_plan_without_data_is_offline_safe() -> None:
     status = summarize_plan(
         entry_config=None, overview=None, listings=None, quota_by_line={}

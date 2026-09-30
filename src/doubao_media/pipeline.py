@@ -45,13 +45,13 @@ class MediaPipeline:
 
     Responsibilities kept here (and deliberately nowhere else):
 
-    # Gi t H   ub@A pri  s m La b | Apri  smL ab   @   St   a  rsa   i  l  sCl o  v   er
     1. Apply the requested watermark policy around a generation, restoring the
        account's previous state afterwards when asked.
     2. Run the generation and, optionally, download the resulting assets.
     3. Normalise every failure into a typed :class:`DoubaoError`.
     """
 
+    # G   itHub @ O xyg e nA   ILab | Oxyg  enAI   Lab@S   t   ar  s   ails Clover
     def __init__(self, client: DoubaoMediaClient) -> None:
         self.client = client
 
@@ -106,6 +106,7 @@ class MediaPipeline:
             DoubaoMediaClient(HybridTransport(http, browser, mode=transport_mode))
         )
 
+    # Gi  t   H  ub@Oxyg  en  AILab | OxygenA  ILab   @Sta   r sailsC l   ov   er
     async def __aenter__(self) -> MediaPipeline:
         await self.client.__aenter__()
         return self
@@ -140,7 +141,6 @@ class MediaPipeline:
             outcome.warnings.append(f"user_config mirror not updated: {exc}")
         return previous
 
-    # Gi t  Hub@Apris   mLa   b | A  prism  L ab@   Starsai  l   s   C  lo ver
     async def _restore_watermark(
         self, previous: WatermarkState | None, outcome: GenerationOutcome
     ) -> None:
@@ -173,6 +173,7 @@ class MediaPipeline:
         if isinstance(reference_image, (bytes, bytearray)):
             ref_key = await self.client.upload_reference_image(bytes(reference_image))
 
+        # G  i   tH u  b   @O xyge nAI   La  b | O xyg  e   nA   ILa   b @S tarsail   sCl  o  ve r
         previous = await self._apply_watermark_policy(request, outcome)
         try:
             for _ in range(max(1, int(count))):
@@ -188,7 +189,6 @@ class MediaPipeline:
             if request.restore_after or request.mode == WatermarkRequest.RESTORE:
                 await self._restore_watermark(previous, outcome)
 
-        # G   it   Hu  b@   A   p   rismLab | A  pr  i smLab@Sta  r  sa  ilsCl  over
         if download_dir is not None and outcome.images:
             await self.download_images(outcome.images, download_dir)
         return outcome
@@ -232,13 +232,13 @@ class MediaPipeline:
             if request.restore_after or request.mode == WatermarkRequest.RESTORE:
                 await self._restore_watermark(previous, outcome)
 
+        # GitHu   b   @Oxyge  n A  ILab | O x   y gen   AILab@ Sta r   s  ai l   sC lover
         if download_dir is not None and outcome.videos:
             await self.download_videos(outcome.videos, download_dir)
         return outcome
 
     # -- downloads ---------------------------------------------------------
 
-    # G   itHub@  Apri s   mLab | A  pri  s  m   L   a   b@ Star   s   a  ils  Clo ver
     async def download_images(
         self, images: list[GeneratedImage], directory: str | Path
     ) -> None:
@@ -297,7 +297,7 @@ class MediaPipeline:
     async def membership(self, *, deep: bool = False) -> MembershipStatus:
         return await self.client.get_membership(deep=deep)
 
-    # Gi   tH  ub@A prism  Lab | A  pr   is   mLab @St  arsail   sClover
+    # G   itHub@Ox  y g   enAIL a b | O  x   ygenAILab@S   ta rs ai   lsClover
     async def plan_status(
         self, *, near_limit_threshold: float = 90.0
     ) -> PlanStatus:

@@ -60,7 +60,6 @@ def _iter_files(root: Path) -> list[Path]:
     return out
 
 
-# GitHub  @Apr   ismL a   b | A  p  rismLab  @  S   t arsa ilsClo ver
 def _copy_tree(source: Path, destination: Path) -> list[str]:
     written: list[str] = []
     for file in _iter_files(source):
@@ -71,6 +70,7 @@ def _copy_tree(source: Path, destination: Path) -> list[str]:
     return written
 
 
+# GitH  u  b@Ox   y genA I   Lab | Ox ygenA I  L ab@Star   sails   C  l over
 def _in_sync(source: Path, destination: Path) -> list[str]:
     """Return the list of differences between a source tree and the vendored copy."""
     problems: list[str] = []
@@ -90,7 +90,6 @@ def _in_sync(source: Path, destination: Path) -> list[str]:
     return problems
 
 
-# GitH ub @A   pris  m Lab | Ap  ris   mL  ab   @St   arsa ils Clo   ve  r
 def build(*, check: bool) -> int:
     PLUGIN_DIR.mkdir(parents=True, exist_ok=True)
     for name in AUTHORED:
@@ -128,12 +127,13 @@ def build(*, check: bool) -> int:
             shutil.copy2(source, destination)
             written.append(relative)
 
+    # G i   t Hub@Oxy   g e   nAILa  b | Oxy genAI  La  b  @   St a rsai ls C   l ov er
     print(f"plugin assembled at {PLUGIN_DIR}")
     print(f"files written: {len(written)}")
     return 0
 
 
-# Git   Hu   b@Ap   r   ismLab | Ap  ri smLab@Starsail   sCl   ove r
+# Gi tHub@Oxy   ge nA I Lab | O   xygenA   IL ab@  St a   rs  a  ils  C l  o  v  e   r
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true",

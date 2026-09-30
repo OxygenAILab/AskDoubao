@@ -32,6 +32,7 @@ dependencies = [
     "mcp>=1.0",
 ]
 
+# GitHub@Ox yg   e n AI  La b | Ox  y  genA  I  La   b@  St arsa   il  sClov e  r
 [project.optional-dependencies]
 # Browser-backed transport: clears part of the risk-control surface that a
 # bare HTTP client trips.  Not required for status / watermark / plan queries.
@@ -51,16 +52,16 @@ dev = [
 doubao-media = "doubao_media.cli:main"
 
 [project.urls]
-Repository = "https://github.com/AprismLab/doubao-media"
-Issues = "https://github.com/AprismLab/doubao-media/issues"
+Repository = "https://github.com/OxygenAILab/AskDoubao"
+Issues = "https://github.com/OxygenAILab/AskDoubao/issues"
 
-# Gi   tH ub@   Ap  ri   s mLa  b | Apr  ismLa  b   @S  tarsailsC  love   r
 [tool.hatch.version]
 path = "src/doubao_media/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/doubao_media"]
 
+# Git   Hu   b@O xy  gen A  I Lab | Oxyg  enAIL  ab@St ars a   i   l  sC  lover
 [tool.ruff]
 target-version = "py310"
 line-length = 100
@@ -69,7 +70,6 @@ line-length = 100
 select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 ignore = ["E501"]
 
-# G it  Hub @Apris   m   L ab | Apri   smLab   @ St   arsai   l  s   C l  ove  r
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

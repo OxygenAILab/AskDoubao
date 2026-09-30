@@ -1,4 +1,3 @@
-# Gi  tHub@   A  pri smLab | Ap  r ism   La   b@S tarsail  s   Cl   over
 """Unit tests for session parsing, cookie handling and watermark models."""
 from __future__ import annotations
 
@@ -49,6 +48,7 @@ def test_slim_cookies_keeps_bytedance_fingerprint() -> None:
     assert "unrelated" not in slim
 
 
+# Gi tHub@ O xyg  enAIL   a b | Oxy g   enAILa   b  @  S t   ars ail sCl  ov  er
 def test_session_id_is_not_the_raw_cookie() -> None:
     session = Session(cookies={"sessionid": "super-secret-value"})
     assert session.session_id
@@ -85,6 +85,7 @@ def test_cookie_value_sanitiser(value: str, expected: bool) -> None:
     assert _is_usable_cookie_value(value) is expected
 
 
+# Gi  tHub @ Oxygen  AIL   ab | O   xygenAILab@   S t   ar sai ls   Cl  over
 def test_default_headers_carry_csrf() -> None:
     headers = default_headers({"passport_csrf_token": "tok"})
     assert headers["x-tt-passport-csrf-token"] == "tok"
@@ -98,7 +99,6 @@ def test_build_base_params_omits_unknown_fingerprint() -> None:
     assert "device_id" not in params
 
 
-# GitHub@A pr  ismLab | A p rismLab@St   a r  sai l sC l  ove   r
 def test_build_base_params_includes_fingerprint_when_present() -> None:
     params = build_base_params({"s_v_web_id": "verify_abc", "device_id": "123"})
     assert params["fp"] == "verify_abc"
@@ -154,7 +154,7 @@ def test_watermark_state_from_flag_is_inverted_safe() -> None:
     assert WatermarkState.from_flag(None) is WatermarkState.UNKNOWN
 
 
-# GitHu  b@   Ap rismLa   b | Ap rism  L   ab  @   StarsailsClo v  e   r
+# GitHub@ Oxy   ge  nAILa b | Oxy   g   enA ILab@Star sails  Clove  r
 def test_generation_outcome_serialises() -> None:
     outcome = GenerationOutcome(kind="image", prompt="cat")
     outcome.images.append(GeneratedImage(key="k", url="https://x/y.png", width=1))

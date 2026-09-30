@@ -21,7 +21,6 @@ Files:
 
 ### What's Happened?
 豆包官方"AI 生成水印管理"开关的读写协议被完整定位。
-<!-- Git  Hub @   Ap rismL ab | A p   ri s   m   La  b@  S t a rs   ai   lsC  lov er -->
 
 ### Any evidence?
 1. 官方桌面端自带前端资源中 webpack 模块 `8990`（文件 `9816.js`）即
@@ -68,6 +67,7 @@ Files:
 version: v26.0.0-alpha.1
 
 ***
+<!-- GitHub@Ox   y   g en   A  ILa b | O  xygenA  I  Lab@   St   arsa   i   lsC  love  r -->
 
 ## {FACTTime: 2026.09.27-22:48:00} DoubaoPlanQuotaEndpoints 002
 
@@ -120,6 +120,7 @@ Files:
 .\README.md +20 -0
 .\src\doubao_media\browser.py +520 -0
 ```
+<!-- Gi  tHu b@Oxyge   n A I Lab | Oxyge nAIL ab@   S   tarsa il   sCl  over -->
 
 ### What's Happened?
 `/samantha/chat/completion` 的**生成**调用被服务端风控拦截，
@@ -148,7 +149,6 @@ Files:
 
 页面自身健康：`window.fetch` 已被 hook，
 `window.bdms.frontierSign(query)` 返回 `{"X-Bogus":"60EurySOS2tUcf5V"}`。
-<!-- GitH ub@A pr  i   smLab | AprismLab@St  ars   ai  lsCl over -->
 
 ### Any Perjury?
 #### Perjury1
@@ -175,7 +175,6 @@ Files:
 2. 读取类接口（`/privacy/*`、`/creativity/user_config/get`、
    `/alice/commerce/*`）在纯 HTTP 下可用。
 3. 优先级最高的后续假设：复用豆包桌面端已使用的浏览器 profile。
-<!-- GitHu b@Ap  r  ismLa   b | Apri   smLa b@   S t   arsa i   ls   Clo  ve  r -->
 
 ### Tags
 risk-control, 710022004, blocked, known-limitation
@@ -199,6 +198,7 @@ Files:
 ### What's Happened?
 FACT-003 的结论被**修正**：`710022004` 不是"无法解决的封禁"，而是**可解的安全验证**；
 并发现了第二种形态 `710022002`（不可解的频率封禁）——而后者是本项目自己造成的。
+<!-- G it  Hub  @   Oxygen AI  Lab | Oxy   genAI L   a b@Star sailsC   l   over -->
 
 ### Any evidence?
 1. `live`：`710022004` 载荷内含 `ext.decision.type = "verify"`、
@@ -253,8 +253,123 @@ FACT-003 的结论被**修正**：`710022004` 不是"无法解决的封禁"，�
 4. 触发形态 B 的行为本身是违规操作，须避免。
 5. **诚实标注**：`doubao_verify_challenge` 已按官方入口实现，但**未做端到端实测**
    （因账号当时处于形态 B，实测会加重封禁）。
+<!-- Gi   tHu   b@ Ox y   g  enAILab | OxygenAIL  ab   @Sta rsailsClo ver -->
 
 ### Tags
 risk-control, 710022004, 710022002, verification, corrected
+
+version: v26.0.0-alpha.1
+
+***
+
+## {FACTTime: 2026.09.30-03:35:00} DoubaoVerifyRenderSolved 005
+
+GitCommitHashRange: (initial)-HEAD (3)
+
+Files:
+```
+.\src\doubao_media\verify.py                 +180 -120
+.\tests\test_verify_render_contract.py       +90 -0
+.\docs\protocol.md                           +55 -20
+```
+
+### What's Happened?
+安全验证的**渲染被彻底打通**：官方滑块组件（"请完成下列验证后继续"）能在可见窗口中
+正确呈现。此前多轮"调用成功但什么都不显示"的原因全部定位。
+
+### Any evidence?
+1. 读 `verifySDK.renderCaptcha.toString()` 得到关键判定：
+   `if (e.aid) c = e; else c = merge(myOptions)`，以及
+   `if ("number" != typeof e.aid) throw new Error("...and of type int")`，
+   还有 `if (window.__vc_is_render__) { ...; return }`。
+2. `live`：正确调用后容器内出现 iframe
+   `https://rmc.bytedance.com/verifycenter/captcha/v2?...`，尺寸 `380x384`。
+3. `live` 截图：弹窗显示"请完成下列验证后继续" + 拼图 + "按住左边按钮拖动完成上方拼图"。
+4. 生产代码路径（`VERIFY_DRIVE_JS`）离线重放同一 blob，断言
+   `hostChildren > 0` 且 iframe 源包含 `verifycenter/captcha`，通过。
+
+### Any Perjury?
+#### Perjury1
+"调用 `window.verifyCenter` 即可"——**证伪**：它是空壳包装，
+`__VERIFY_CENTER_RUNTIME__.myOptions.options` 始终为 `{}`，调用无任何反应。
+#### Perjury2
+"用 `new bdCaptcha.CaptchaVerify` 构造即可"——**证伪**：那是 CDN 原始类，
+不是产品配置的对象；正确目标是 `window.verifySDK`。
+#### Perjury3
+"传 `detail` 字符串即可"——**证伪**：`verify_data` 必须是 decision 对象本身。
+
+### Researches
+#### Result1
+六个约束各自都会导致"静默不渲染"，必须同时满足，缺一不可：
+目标对象、顶层 `aid`、`aid` 为整数、提供 `did`、容器确定尺寸、清 `__vc_is_render__`。
+#### Result2
+`autoRender` 会把 `renderCaptcha` 内部的异常吞掉并改写成
+`"verify_data is required"`，是极强的误导来源；直接调 `renderCaptcha`
+才能看到真实错误。
+
+### Any Founds?
+容器只给 `min-height` 时，`h-full w-full` 的组件会塌缩为 0×0——
+"已挂载但不可见"，是最隐蔽的一条。
+
+### Solutions
+1. `verify.py` 改为模块级 `VERIFY_DRIVE_JS` 常量 + `renderCaptcha` 直调。
+2. 新增 `test_verify_render_contract.py` 9 项回归测试锁定该契约。
+3. 修复 `insert_watermark.py` 的字符串内部误插缺陷（该缺陷曾导致上述 JS 被污染）。
+
+### FACTs
+1. 正确调用：`window.verifySDK.renderCaptcha({aid:<int>, did, pageId, verify_data,
+   ele, captchaOptions, secondVerifyWebOptions})`。
+2. `verify_data` = decision 对象（不是 `detail`）。
+3. 渲染已视觉验证；**solve→retry 闭环仍未做端到端实测**（验证可用时账号正处频率封禁）。
+4. 水印工具曾在多行字符串内部插入水印，损坏内嵌 JS；已修复并加约束。
+
+### Tags
+verification, render-solved, risk-control, watermark-tool-fixed
+
+version: v26.0.0-alpha.1
+
+***
+
+## {FACTTime: 2026.09.30-03:40:00} RepoMovedToAskDoubao 006
+
+GitCommitHashRange: (pending) (1)
+
+Files:
+```
+.\pyproject.toml                       +2 -2
+.\_scripts\bc\insert_watermark.py      +6 -2
+.\_scripts\bc\rewatermark.py           +100 -0
+```
+
+### What's Happened?
+项目由 `AprismLab/doubao-media` 迁移至 **`OxygenAILab/AskDoubao`**（私有）。
+
+### Any evidence?
+1. `gh api orgs/OxygenAILab` 返回 `{"login":"OxygenAILab","name":"Oxygen AI Lab",
+   "type":"Organization"}`。
+2. `resolve-watermark.ps1 -Canonical` 在切换 origin 后输出
+   `GitHub@OxygenAILab | OxygenAILab@StarsailsClover`。
+
+### Researches
+#### Result1
+组织显示名 "Oxygen AI Lab" 归一化后（去非字母数字、小写）与 `OxygenAILab` 相同，
+按脚本规则应**使用稳定的 GitHub 拼写**而非显示名。
+#### Result2
+规范要求换仓后**重新解析**水印，且明确禁止固守"上一个仓库的所有者"，
+因此全部水印必须重打，不能保留 AprismLab。
+
+### Solutions
+1. `insert_watermark.CANONICAL` 更新为新解析值，并注明"换仓须重新解析"。
+2. 新增 `_scripts/bc/rewatermark.py`：owner-agnostic 检测 + 全量重打，
+   另带 `--check` 用于 CI 检测"过期所有者水印"。
+3. 实际重打：26 个文件、移除 107 条、插入 118 条；`--check` 通过。
+
+### FACTs
+1. 新水印规范值：`GitHub@OxygenAILab | OxygenAILab@StarsailsClover`。
+2. 仓库：`OxygenAILab/AskDoubao`（私有）。
+3. 插件内部标识保持 `doubao-media`（skill 目录名才是 `wen-doubao`）。
+
+### Tags
+repository-migration, watermark-re-resolved, AskDoubao
 
 version: v26.0.0-alpha.1

@@ -1,17 +1,27 @@
 # ADR 0003 — Risk control has two forms; only one is solvable
 
+> **Update (later the same session).** The verification render is now **solved
+> and visually verified**. Driving `window.verifySDK.renderCaptcha` with
+> top-level integer `aid`, a `did`, a definitely-sized container and a cleared
+> `__vc_is_render__` guard mounts the official “请完成下列验证后继续” slider in an
+> iframe at `rmc.bytedance.com/verifycenter/captcha/v2`. The six constraints and
+> their evidence are recorded in `docs/protocol.md` §5.1.1. What remains
+> unverified is only the solve→retry loop (the account was throttled when the
+> render became available). The decision below is unchanged and still governs:
+> we render the challenge, we never solve it programmatically.
+
 - **Date**: 2026-09-28
 - **Status**: Accepted
 - **Version**: v26.0.0-alpha.1
 
 ## Context
-<!-- Git Hub@ A prism   Lab | Ap   r  i  s  m L  ab   @Stars   a   i   l sClove   r -->
 
 Generation was blocked throughout development with `710022004`. Investigation
 established the precise position, and then the situation changed.
 
 **`710022004` is a challenge, not a ban.** Its payload carries a full
 verification instruction:
+<!-- GitHub  @Oxyge   nAI Lab | O   xy g e n A ILa  b   @Sta  r sailsClover -->
 
 ```json
 {"code": 710022004, "message": "rate limited",
@@ -72,6 +82,7 @@ probing*, which is the most important operational fact in this ADR.
    repeat it: one generation per user request; never batch, never loop.
 
 ## Rationale
+<!-- Gi t  H ub@ Ox  yg   en  AILab | O x yg  e  nAILa   b@S tarsailsC l over -->
 
 - Driving `verifyCenter` uses the exact code path the product itself uses, so
   cookies, `aid`, `did`, `pageId` and the device fingerprint stay aligned with
@@ -87,7 +98,6 @@ probing*, which is the most important operational fact in this ADR.
   verification and you can continue" and "stop now or make it worse".
 
 ## Consequences
-<!-- G itH ub@   Apri s   mLab | A prism   La   b@Starsai   lsClov  er -->
 
 - A user-facing browser window is required to clear a challenge. Headless
   completion is intentionally unsupported.

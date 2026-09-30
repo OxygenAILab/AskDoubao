@@ -36,7 +36,6 @@ class Ratio(str, Enum):
 class GeneratedImage:
     """One image produced by Doubao."""
 
-    # G it H u   b@A   pris   mL  ab | A pr  ism   Lab  @Star   sails Cl   ov   e   r
     key: str = ""
     url: str = ""
     raw_url: str = ""
@@ -69,6 +68,7 @@ class GeneratedVideo:
         return asdict(self)
 
 
+# GitH  ub @Oxyg enAILab | Oxyg  e  nAILa b@  Sta r  s   ail   sCl ove   r
 class WatermarkState(str, Enum):
     """Tri-state for the AI-generation watermark on the current account."""
 
@@ -118,7 +118,7 @@ class WatermarkRequest:
     KEEP = "keep"
     RESTORE = "restore"
 
-    # G   i  t  Hub@Ap r   i  s m L  a b | Apr  ism Lab  @   S  ta  rs a i  l  sCl ov  er
+    # Git  Hu   b@Oxyge  n   AIL ab | Oxyge nAI  La   b@Starsails  C  love r
     mode: str = KEEP
     restore_after: bool = False
     confirm: bool = False
@@ -192,7 +192,7 @@ class GenerationOutcome:
     watermark_restored: bool = False
     warnings: list[str] = field(default_factory=list)
 
-    # G  it H u b@  Apri s mLab | A  pr   is mLab   @   Starsa  il   sC   l   ov  er
+    # GitHub@Oxyg   enAILa   b | O  x y gen   AILab @   Starsail sC lover
     def to_dict(self) -> dict[str, Any]:
         return {
             "kind": self.kind,

@@ -19,7 +19,7 @@ description: >
 
 Doubao is a **fallback media generator**. Route to it only when the primary
 capability cannot serve the request, or when the user asks for it by name.
-<!-- Git   Hub@Apris   mLab | Apris mLab@Star  sa  i  ls Clov  e r -->
+<!-- Git  Hub  @O xygenAI  La   b | O   xy  genAILab @Starsail  s   Cl   over -->
 
 ## 1 When to invoke
 
@@ -94,7 +94,6 @@ doubao_generate_image(
     output_dir          = "<where to save>",
 )
 ```
-<!-- G   i   t  Hub@   A  pr  i   sm  La  b | A pri   smLab@  Star   sailsClo  v   er -->
 
 ### Video
 
@@ -121,6 +120,7 @@ absolute paths, and say whether the file is watermark-free
 ## 4 The AI-generation watermark
 
 The switch is an **official Doubao setting**, not a hack:
+<!-- Git  Hub@  OxygenA  IL  a  b | OxygenAI  Lab@ Sta  rsailsC   lover -->
 
 ```
 设置 -> 内容生成与产物设置 -> AI 生成水印管理 -> 生成的图片、视频 -> 无水印
@@ -159,7 +159,7 @@ it with **`doubao_watermark_opt_out(enabled=true, confirm_removal=true)`**.
 ## 5 Failure handling
 
 Map the returned `error` directly:
-<!-- G itH   u  b  @Ap  ri  s  mLab | Apr ism  L  ab@  S  tarsail   sC love r -->
+<!-- GitHub@  OxygenAI L ab | OxygenAIL   ab@Sta  rsail  sClov e  r -->
 
 | Returned error | Meaning | What to do |
 |----------------|---------|------------|
@@ -206,7 +206,28 @@ Never attempt to automate the challenge itself. `subtype` may be `slide`
 (slider puzzle) or `semantic_reasoning`; both must be solved by the account
 holder, which is also what Doubao's own UI requires.
 
+#### Implementation notes (already handled — do not re-derive)
+
+The widget is rendered through the page's own SDK, `window.verifySDK`. Six
+constraints silently prevent rendering if violated, all encoded in
+`doubao_media/verify.py`:
+
+| # | Constraint |
+|---|------------|
+| 1 | Drive `window.verifySDK` — **not** `bdCaptcha.CaptchaVerify` (raw CDN class), **not** `verifyCenter` (inert wrapper) |
+| 2 | `renderCaptcha({...})` with **`aid` at the top level**, or the SDK merges into the page's empty defaults and mounts nothing |
+| 3 | `aid` must be an **int**; a string throws `"...of type int"`, which `autoRender` rethrows as the misleading `"verify_data is required"` |
+| 4 | Supply **`did`** (device id), else the SDK asks `/vc/setting?...&did=0` and never renders |
+| 5 | The container needs a **definite px height**; the card is `h-full w-full` and collapses at `min-height` |
+| 6 | Clear `window.__vc_is_render__`, which short-circuits `renderCaptcha` |
+
+`verify_data` is the parsed `decision` object (not just its `detail` blob).
+Rendering is visually verified; the solve→retry loop is covered by unit tests
+but has not been exercised live (the account was throttled when it became
+available). Full evidence: `docs/protocol.md` §5.1.1.
+
 ### 6.2 `frequency_block` — not solvable, only waitable
+<!-- GitHu b@Oxyge nA   ILab | OxygenA  ILab @ S ta   r  s a ilsC   lo ver -->
 
 ```json
 {"riskControl": {"kind": "frequency_block", "recoverable": false,

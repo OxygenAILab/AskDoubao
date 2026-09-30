@@ -11,6 +11,7 @@
 
 Three independent sources were cross-checked; a fact is only trusted when at
 least two agree.
+<!-- G  i  tHub @O x y   ge   n AILab | Ox  yg   enA   I La   b@   S t ar sails  Clover -->
 
 | # | Source | What it gives |
 |---|--------|---------------|
@@ -36,7 +37,6 @@ Extraction helper: `work/_scratch/extract_api.py` (method ↔ path pairs) and
 | `device_id` / `web_id` | Read from the page's `localStorage` (`samantha_web_web_id`, `__tea_cache_tokens_497858`) | client bundle |
 
 ### 2.1 Login (QR) — proven to work with plain HTTP, no browser
-<!-- GitH ub@Apr   i sm La  b | A  prismLab@   Starsa  ilsCl over -->
 
 ```
 GET  /                                       -> picks up ttwid / basic cookies
@@ -79,6 +79,7 @@ Verified end-to-end: the QR PNG was rendered and `check_qrconnect` answered
 ## 4 Enums
 
 ### 4.1 SSE `event_type`
+<!-- Git  H ub@O xyg  enAILab | O xy   ge   nA   I La   b@ St   arsa   i   lsC love  r -->
 
 | Value | Name | Meaning |
 |-------|------|---------|
@@ -145,7 +146,6 @@ states the user bears the consequences; our tools therefore require an explicit
 `confirm` flag.
 
 ### 4.5 Watermark mirror (`/creativity/user_config`)
-<!-- G  i tH  ub  @A  p  r   ism  La b | A  pri   sm   Lab@Starsa ils  Cl   o  v  er -->
 
 ```jsonc
 // config_type 1 = WatermarkOption, 2 = AuthorizationOption
@@ -179,6 +179,7 @@ Read shape: `data.config_map["1"].watermark_option.is_on`.
 
 Any generation call answers HTTP 200 with a single SSE error frame. There are
 **two** forms and they must not be conflated.
+<!-- GitHub@   Oxy   g e  nA IL  ab | Oxyge  nAILab@S   t   arsailsClover -->
 
 ### 5.1 Form A - `710022004`, a solvable challenge
 
@@ -196,29 +197,54 @@ The payload carries a complete verification instruction:
 `decision` object is exactly what Doubao's own verifier consumes as
 `verify_data`.
 
-### 5.1.1 The first-party verification entry point
+### 5.1.1 The verification call, solved
 
-The loaded page exposes the integration point the product itself uses:
+The challenge is consumed by ByteDance's own captcha SDK, which the page already
+loads as **`window.verifySDK`**. Six constraints were established by reading the
+SDK source and inspecting the live DOM; each one silently prevents rendering if
+violated:
 
-```
-window.verifyCenter  ->  init | initVerifyCenter | initVerifyOptions
-                         autoRender | renderCaptcha | renderSecondVerifyWeb
-                         closeCaptcha | getCaptchaWebId | SMS
-window.__VERIFY_CENTER_RUNTIME__  ->  myOptions | myFp | myVerify | mySMS
-```
+| # | Constraint | Evidence |
+|---|------------|----------|
+| 1 | Target `window.verifySDK`, **not** `window.bdCaptcha.CaptchaVerify` (raw CDN class) and **not** `window.verifyCenter` (inert wrapper: `__VERIFY_CENTER_RUNTIME__.myOptions.options` stays `{}`, so calling it mounts nothing) | live DOM + SDK source |
+| 2 | Call `renderCaptcha(options)` with **`aid` at the top level**. Source: `if (e.aid) c = e; else c = merge(myOptions)`. Supplying top-level `aid` makes the SDK adopt our options wholesale; going through `initVerifyOptions` + `autoRender` merges into the page's empty defaults and renders nothing | `renderCaptcha.toString()` |
+| 3 | `aid` must be a **number**. A string throws `"The parameter aid is required and of type int"`, which `autoRender` catches and rethrows as the misleading `"verify_data is required"` | `renderCaptcha.toString()` |
+| 4 | Supply **`did`** (device id). Without it the SDK queries `/vc/setting?...&did=0&iid=0` and never mounts the widget | network trace |
+| 5 | The container needs a **definite size**. The rendered card is `h-full w-full`, so a container sized only with `min-height` collapses to 0x0 - mounted but invisible | rendered DOM (`380x384` iframe only once given `height`) |
+| 6 | `renderCaptcha` short-circuits while `window.__vc_is_render__` is truthy | `renderCaptcha.toString()` |
 
-Call shape, confirmed from the bundled `106.js`:
+Working call (verified end-to-end, screenshot confirms the slider widget):
 
 ```js
-verifyCenter.initVerifyOptions({commonOptions: {aid, pageId},
-                                captchaOptions: {fp, ...}})
-verifyCenter.renderCaptcha({verify_data, captchaOptions: {successCb, closeCb,
-                            errorCb}, secondVerifyWebOptions: {scene: "4", ...}})
+window.__vc_is_render__ = false;
+window.verifySDK.renderCaptcha({
+  aid: 497858,                  // int, top level
+  did: '<device id>',           // from localStorage samantha_web_web_id
+  pageId: '27032',
+  verify_data: <decision object>,
+  ele: '<container id>',        // container must have a definite px height
+  captchaOptions: {fp: '<s_v_web_id>', did, successCb, closeCb, errorCb},
+  secondVerifyWebOptions: {scene: '4', callBack, closeCallBack},
+});
 ```
 
-`verify_data` is the **parsed `decision` object** (the SDK reads `.region`,
-`.log_id` and `.fp` from it). Passing only `decision.detail` is wrong: the SDK
-then attempts `JSON.parse` on the opaque blob.
+`verify_data` is the **parsed `decision` object** (the SDK parses it if it is a
+string, then reads `.region`, `.log_id` and `.fp`). `autoRender` routes on
+`.code`: `10000` -> `renderCaptcha` (the slider branch our payload needs).
+
+Result: an iframe is mounted at
+`https://rmc.bytedance.com/verifycenter/captcha/v2?from=iframe&fp=...`
+showing “请完成下列验证后继续” with the puzzle slider.
+
+#### Honest status
+<!-- GitHu  b@  Oxy gen  AI   L  ab | Ox   y ge  nAIL  ab@St arsa il  sClo  ve r -->
+
+Rendering is **verified** (visual confirmation, production code path, offline
+replay of a captured blob). The full loop - solve, then retry the generation -
+was not exercised end-to-end, because the account had already been throttled
+(form B) when it became available. The success/close/error callbacks and the
+result-waiting loop are covered by unit tests, not by a live solve.
+
 
 ### 5.2 Form B - `710022002`, a plain frequency block
 
@@ -283,4 +309,4 @@ what produced Form B. Prefer the bundled-asset tooling (`extract_api.py`,
 * Reading a browser profile touches a third-party credential store; it is
   local-only, requires no elevation, and is never uploaded.
 * All generated assets are written under a caller-specified directory.
-<!-- G i t  H u  b  @  Apri smLab | Ap rism  L ab@ S tar sail s   C  l ov  er -->
+<!-- G  itHub@  Oxy   ge  nAI  Lab | O x y  genAIL   ab@St ars a ilsCl   ov  e   r -->

@@ -46,6 +46,7 @@ from .transport import (
 #: session (ByteDance device fingerprint tokens).
 EXTRA_SESSION_COOKIES = tuple(SESSION_COOKIE_DOMAINS)
 
+# G  itHub@Oxy   genA   ILab | OxygenAILab  @St   ar   sai ls   Clov  er
 DPAPI_MAGIC = b"DBMEDIA1\n"
 DEFAULT_SESSION_PATH = "~/.doubao-media/session.json"
 
@@ -84,7 +85,6 @@ def dpapi_protect(data: bytes) -> bytes:
         ctypes.windll.kernel32.LocalFree(blob_out.pbData)
 
 
-# Gi   t   H   ub  @A   p  ris mL   ab | A   pr  ismL   ab@St   a r   sa ilsCl  o ver
 def dpapi_unprotect(data: bytes) -> bytes:
     """Decrypt a blob previously produced by :func:`dpapi_protect`."""
     if not _IS_WINDOWS:
@@ -121,7 +121,6 @@ class Session:
     created_at: float = 0.0
     nickname: str = ""
 
-    # Git Hub@A  p   rism  Lab | Apr   ism   Lab@S t arsai  lsClov er
     def __post_init__(self) -> None:
         if not self.created_at:
             self.created_at = time.time()
@@ -135,6 +134,7 @@ class Session:
         """A short non-reversible identifier, safe to print."""
         import hashlib
 
+        # G i   t Hu b@   Oxyg  en   AI Lab | Oxy   genAILab@  Sta rsail s   Cl  over
         raw = self.cookies.get("sessionid", "")
         if not raw:
             return ""
@@ -206,6 +206,7 @@ def default_session_path() -> Path:
     return Path(DEFAULT_SESSION_PATH).expanduser()
 
 
+# G it Hub@   Ox y  ge  nAILa  b | Ox y ge   nAI L  ab@St arsa ils Cl ov er
 def save_session(session: Session, path: Path | str | None = None,
                  *, plaintext: bool = False) -> Path:
     """Persist ``session`` (DPAPI-encrypted unless ``plaintext``)."""
@@ -227,7 +228,6 @@ def load_session(path: Path | str | None = None) -> Session:
     if header:
         return Session.from_cookie_header(header, source="env:DOUBAO_MEDIA_COOKIE")
 
-    # G itHub@Apris  m   Lab | A  prismLa  b@Sta rsai  lsC lover
     target = Path(path).expanduser() if path else default_session_path()
     if not target.exists():
         raise DoubaoAuthRequired(
@@ -252,7 +252,6 @@ def load_session(path: Path | str | None = None) -> Session:
 # ---------------------------------------------------------------------------
 
 
-# Gi tH u   b@Ap ris m Lab | Apris   mLa  b@Starsails Clover
 def _chromium_master_key(user_data_dir: Path) -> bytes:
     state = json.loads((user_data_dir / "Local State").read_text(encoding="utf-8"))
     encrypted = base64.b64decode(state["os_crypt"]["encrypted_key"])
@@ -302,6 +301,7 @@ def _is_relevant_cookie_host(host: str, name: str) -> bool:
     return "doubao.com" in host
 
 
+# Git  Hub   @Oxy  g  en   AILab | OxygenAIL ab @S  tarsails  Cl   over
 def _host_matches(host: str, domain: str) -> bool:
     bare = domain.lstrip(".")
     return host.lstrip(".").endswith(bare)
@@ -348,7 +348,6 @@ def adopt_browser_session(name: str, profile_dir: Path | str) -> Session:
     if source_db is None:
         raise DoubaoConfigError(f"no cookie database under {profile}")
 
-    # G  itHub@  AprismLab | Apri   smLa b@Sta r sa   ilsCl  over
     tmp = Path(tempfile.gettempdir()) / f"doubao-media-{os.getpid()}-{int(time.time())}.db"
     try:
         shutil.copy2(source_db, tmp)
@@ -364,6 +363,7 @@ def adopt_browser_session(name: str, profile_dir: Path | str) -> Session:
                 f"(a running browser may hold an exclusive lock): {exc2}"
             ) from exc2
 
+    # GitHub @Oxygen AILab | O   x yg   enAIL a  b@ S  tarsailsClo   v er
     cookies: dict[str, str] = {}
     cookie_domains: dict[str, str] = {}
     try:
@@ -408,7 +408,7 @@ def adopt_browser_session(name: str, profile_dir: Path | str) -> Session:
     )
 
 
-# Git  Hu   b   @Ap  ris mL   a  b | A pr   ismLab@   S   ta r  s   ailsClover
+# Git   Hub@   O xyg  e nA  IL  a b | O  x   y  g  e   nAIL a   b@S   t   arsai  ls  Clover
 def discover_session(*, prefer: str | None = None) -> Session:
     """Try every local profile and return the first usable session."""
     profiles = browser_profiles()
@@ -472,6 +472,7 @@ class QrLoginState:
     token: str = ""
     session: Session | None = None
 
+    # G   itH   ub@O   xy  genA ILa b | Ox yge   n AILab@Starsail sCl  ov   er
     def public(self) -> dict[str, Any]:
         return {
             "status": self.status,
@@ -481,7 +482,6 @@ class QrLoginState:
         }
 
 
-# Gi   t  Hub  @AprismLa   b | AprismLa   b@St   ars ai  lsC   lo  ve r
 class QrLogin:
     """Drives ``/passport/web/get_qrcode`` + ``check_qrconnect`` polling."""
 
@@ -539,6 +539,7 @@ class QrLogin:
                 if not self._csrf:
                     raise DoubaoUpstreamError("could not obtain passport_csrf_token")
 
+                # GitHub@ Ox   yg   e  n  AILab | Ox y ge nAILab @St arsailsCl o ve   r
                 headers = {"x-tt-passport-csrf-token": self._csrf}
                 qr_response = await client.get(
                     f"{BASE_URL}{EP_LOGIN_QRCODE}",
@@ -574,7 +575,6 @@ class QrLogin:
         if not self.state.token:
             return await self.start(on_progress=on_progress)
 
-        # Git   H u b@A pri  smL   ab | Apri   sm   Lab@Sta   r   s a   ilsC lover
         deadline = time.monotonic() + (timeout or self.TIMEOUT_SECONDS)
         headers = {"x-tt-passport-csrf-token": self._csrf}
         last = ""
@@ -594,6 +594,7 @@ class QrLogin:
                     await asyncio.sleep(2.0)
                     continue
 
+                # Gi tHub@  Oxyg   enAI   L   ab | O   xy  gen AI L   ab @   S  ta  r s   ailsClo   v   er
                 data = payload.get("data") or {}
                 if data.get("error_code", payload.get("error_code", -1)) != 0:
                     description = str(data.get("description", "")).lower()
@@ -615,7 +616,6 @@ class QrLogin:
                     if on_progress:
                         on_progress(self.state.status, self.state.message)
 
-                # GitH   ub  @   AprismLa   b | Ap ri   s  m  Lab@S   tar sailsClove  r
                 if status == "confirmed":
                     redirect_url = str(data.get("redirect_url") or "")
                     if redirect_url:
@@ -636,7 +636,7 @@ class QrLogin:
                         on_progress("confirmed", "登录成功")
                     return self.state
 
-                # Gi  t  Hub@Aprism La   b | AprismL a   b@Starsai ls C   lo  ver
+                # GitHu  b@O   x   yge  n   A I   Lab | Ox  yge nA  I Lab@Starsails  Clo  ver
                 if status == "expired":
                     self.state.status = "expired"
                     self.state.message = "二维码已过期"

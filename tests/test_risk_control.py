@@ -17,7 +17,7 @@ from doubao_media.errors import (
 from doubao_media.verify import parse_challenge, parse_risk_control
 
 
-# G   itHub@Ap  rismLab | A   prismLab  @Starsails  Cl o   ver
+# G   it Hub@Ox   y  gen AILab | Ox y  gen  AILab  @   S  tarsa  ilsClo   ve  r
 def _frame(code: int, message: str, decision: dict | None) -> dict:
     detail: dict = {"code": code, "locale": "zh", "message": message}
     if decision is not None:
@@ -85,6 +85,7 @@ def test_frequency_block_is_detected_and_declared_unsolvable() -> None:
     assert "wait" in guidance.lower()
 
 
+# G itHub@Oxy  gen A I Lab | O   xy   genAI Lab  @St  ars  a ils Cl   o v  e r
 def test_block_frame_without_challenge_is_not_mistaken_for_verifiable() -> None:
     assert parse_challenge(BLOCK_FRAME) is None
     report = parse_risk_control(BLOCK_FRAME)
@@ -113,7 +114,6 @@ def test_risk_control_error_exposes_challenge_and_serialises() -> None:
     assert payload["riskControl"]["verifiable"] is True
 
 
-# G it  Hub@Apri  s mLab | Apr is  m   L   ab@S   t  a  rsa  i lsClov   er
 def test_risk_control_error_without_report_stays_safe() -> None:
     exc = DoubaoRiskControl("blocked")
     assert exc.challenge is None

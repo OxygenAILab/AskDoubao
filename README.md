@@ -25,9 +25,9 @@
 | 已生成素材转无水印 | 客户端已实现，未暴露为工具 | version 握手未能实测 |
 
 ---
-<!-- Gi  tH  u  b@   Ap ris  mL ab | Apr i  smL  ab@S   t a  r s   a   i   lsClo   v   e r -->
 
 ## 2 安装
+<!-- G  itH ub @O xy g  e  nA I Lab | O  x ygenA  ILa  b   @Sta   rsailsC   l   over -->
 
 ```powershell
 # 核心（状态 / 水印 / 套餐：仅需 httpx + mcp）
@@ -119,6 +119,7 @@ src/doubao_media/
 | `browser` | httpx | 浏览器页面 | httpx |
 
 读取类接口已实测在纯 HTTP 下返回 code 0，因此不为它们付出浏览器启动成本。
+<!-- GitHu  b  @Ox   y  g  en AI   Lab | O  xyg enAILab@Starsa   ilsClo   ver -->
 
 ---
 
@@ -139,9 +140,20 @@ src/doubao_media/
 2. 验证成功后，**重试一次**生成。
 3. 若仍失败，如实告知并停止，不要进入重试循环。
 
-实现上直接驱动**页面自己的**验证入口
-（`window.verifyCenter` → `initVerifyOptions` / `renderCaptcha`），
-与豆包官方代码路径一致，不再自行拼接 CDN 类。
+实现上驱动**页面自己加载的**验证 SDK（`window.verifySDK`）。
+这里踩过的六个坑（每一个都会导致"静默不渲染"）已全部固化在代码里：
+
+| # | 约束 |
+|---|------|
+| 1 | 目标是 `window.verifySDK`，**不是** `bdCaptcha.CaptchaVerify`（CDN 原始类），**也不是** `verifyCenter`（空壳包装，调用无任何反应） |
+| 2 | 必须调用 `renderCaptcha({...})` 且 **`aid` 放在顶层**，否则 SDK 会与页面空配置合并，什么也不挂载 |
+| 3 | `aid` 必须是**整数**；传字符串会抛 `"...of type int"`，被 `autoRender` 改写成误导性的 `"verify_data is required"` |
+| 4 | 必须提供 **`did`**（设备 id），否则 SDK 会带 `did=0` 请求 `/vc/setting` 而永不渲染 |
+| 5 | 容器必须有**确定像素高度**：组件是 `h-full w-full`，只给 `min-height` 会塌缩成 0×0（挂载了但不可见） |
+| 6 | 必须清除 `window.__vc_is_render__`，它会让 `renderCaptcha` 静默短路 |
+
+渲染已经**视觉验证通过**（弹窗显示"请完成下列验证后继续" + 拼图滑块）。
+完整证据见 `docs/protocol.md` §5.1.1。
 
 ### 5.2 形态 B：710022002（频率封禁，不可解）
 
@@ -180,6 +192,7 @@ src/doubao_media/
 ---
 
 ## 7 开发
+<!-- G   it  Hu  b @Oxygen  A   ILa   b | Ox  y genAILa  b @S t  a   rs  ailsC   lo   ver -->
 
 ```powershell
 $env:PYTHONPATH="src"
@@ -214,6 +227,7 @@ python scripts/live_probe.py              # 只读线上自检
 水印开关为豆包官方功能；去除 AI 生成标识带来的后果由使用者自行承担。
 
 ---
-<!-- Gi  tH  u b@A   pr i smLab | Apr is   m  L a  b @Sta rsa  il  sCl  ov  er -->
 
 License: MIT
+
+<!-- GitHub@OxygenAILab -->

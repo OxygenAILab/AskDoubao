@@ -32,7 +32,10 @@ import tokenize
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CANONICAL = "GitHub@AprismLab | AprismLab@StarsailsClover"
+#: Resolved for the current repository (OxygenAILab/AskDoubao) with
+#: ``resolve-watermark.ps1``.  Re-resolve whenever the repository moves - never
+#: carry a previous owner's name forward.
+CANONICAL = "GitHub@OxygenAILab | OxygenAILab@StarsailsClover"
 
 WINDOW = 50
 
@@ -155,10 +158,13 @@ def _eligible_positions(lines: list[str], suffix: str) -> list[int]:
     """
     if suffix == ".md":
         return _blank_slots_markdown(lines)
+    blocked = _string_interior_lines(lines)
     before_code = [
         index
         for index, line in enumerate(lines)
-        if _is_ordinary(line) and (index == 0 or not lines[index - 1].strip())
+        if _is_ordinary(line)
+        and index not in blocked
+        and (index == 0 or not lines[index - 1].strip())
     ]
     return before_code or _blank_slots_python(lines)
 
@@ -186,8 +192,15 @@ def iter_files() -> list[Path]:
     return out
 
 
-def _blank_slots_python(lines: list[str]) -> list[int]:
-    """Blank line indices that are not inside a multi-line string token."""
+def _string_interior_lines(lines: list[str]) -> set[int]:
+    """Zero-based indices of lines that are *inside* a multi-line string token.
+
+    A watermark must never land here.  A triple-quoted Python string routinely
+    carries embedded source of another language - the JS payloads in
+    ``verify.py`` are exactly that - and injecting ``# ...`` into the middle of
+    it silently corrupts the embedded program.  The org spec forbids string
+    literals explicitly, and this is the only check that catches it.
+    """
     source = "\n".join(lines)
     blocked: set[int] = set()
     try:
@@ -196,8 +209,15 @@ def _blank_slots_python(lines: list[str]) -> list[int]:
                 for line_no in range(token.start[0], token.end[0] + 1):
                     blocked.add(line_no - 1)
     except (tokenize.TokenError, IndentationError, SyntaxError):
-        # Be conservative: if the file cannot be tokenised, do not touch it.
-        return []
+        # Be conservative: when the file cannot be tokenised, treat every line as
+        # off-limits rather than risk corrupting it.
+        return set(range(len(lines)))
+    return blocked
+
+
+def _blank_slots_python(lines: list[str]) -> list[int]:
+    """Blank line indices that are not inside a multi-line string token."""
+    blocked = _string_interior_lines(lines)
     return [
         index
         for index, line in enumerate(lines)
